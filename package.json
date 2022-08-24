@@ -5,16 +5,23 @@
     "main": "bot.js",
     "author": "Your Name",
     "scripts": {
-        "start": "npx nodemon bot.ts"
+        "start": "npx nodemon bot.ts",
+        "dev": "npx nodemon BurgerBotStart.ts"
     },
     "dependencies": {
+        "@discordjs/rest": "^1.1.0",
         "@tensorflow-models/mobilenet": "^2.1.0",
         "@tensorflow/tfjs": "^3.19.0",
         "@tensorflow/tfjs-node": "^3.18.0",
         "axios": "^0.27.2",
         "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "discord.js": "^14.3.0",
         "dotenv": "^16.0.1",
+        "jimp": "^0.16.1",
+        "jpeg-js": "^0.4.4",
         "node-gyp": "^9.1.0",
+        "png-js": "^1.0.0",
+        "pngjs": "^6.0.0",
         "ts-node": "^10.9.1",
         "winston": "^3.8.1"
     },

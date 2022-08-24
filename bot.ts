@@ -2,7 +2,7 @@ import { Attachment } from "./types/Attachment";
 import { ImageCache } from "./types/ImageCache";
 import * as Discord from "discord.io";
 import * as logger from "winston";
-import * as auth from "./auth.json";
+// import * as auth from "./auth.json";
 import * as mobilenet from "@tensorflow-models/mobilenet";
 import axios from "axios";
 import * as fs from "fs";
@@ -27,7 +27,7 @@ logger.add(new logger.transports.Console);
 
 // Initialize Discord Bot
 var bot = new Discord.Client({
-    token: auth.token,
+    token: process.env.token,
     autorun: true
 });
 
@@ -101,7 +101,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
         }
 
         if (hasSpoilerImage(attachment.filename)){
-            checkSpoiler(attachment, bot, channelID, userID, "I have detected a spoiler image. I will scan this for an attempted burgering").catch((err) => { console.log(`caught the error`) });
+            checkSpoiler(attachment, bot, channelID, userID, "I have detected a spoiler image. I will scan this for an attempted burgering").catch((err) => { console.log(err) });
         }
     } catch (err){
         logger.error(err);
@@ -244,15 +244,13 @@ function startServer(){
         throw new Error(`Host cannot be null`);
     }
 
-    console.log(process.env.NODE_ENV);
-    
     const port = process.env.PORT || 3000;
     
     logger.info(`listening on port ${port}`)
 
     http.createServer(function (req, res) {
         res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.write('You\'ve been burgered');
+        res.write('You\'ve been');
         res.end();
       }).listen(port);
 }
