@@ -5,7 +5,7 @@
     "main": "bot.js",
     "author": "Your Name",
     "scripts": {
-        "start": "npx nodemon bot.ts",
+        "start": "npx nodemon BurgerBotStart.ts",
         "dev": "npx nodemon BurgerBotStart.ts"
     },
     "dependencies": {
