@@ -14,8 +14,6 @@ require(`dotenv`).config();
 startServer();
 
 
-
-
 const commandTrigger = `!`;
 var searchWords = [ `burger` ];
 const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
@@ -83,6 +81,14 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
                     ${commandTrigger}checklastspoiler : Checks the last spoiler image that I have received
                     `});
                     break;
+                case `burger`:
+                    if (!hasTaggedUser(message)){
+                        bot.sendMessage({to: channelID, message: `You have not tagged a user to burger. You've been burgered <@${userID}>`})
+                    } else {
+                        var userToBurger = getTaggedUser(message);
+                        bot.sendMessage({to: channelID, message: `You've been burgered ${userToBurger}`});
+                    }
+                    break;
                 // Just add any case commands if you want to..
             }
         }
@@ -94,7 +100,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
         }
 
         if (hasSpoilerImage(attachment.filename)){
-            checkSpoiler(attachment, bot, channelID, userID, "I have detected a spoiler image. I will scan this for an attempted burgering");
+            checkSpoiler(attachment, bot, channelID, userID, "I have detected a spoiler image. I will scan this for an attempted burgering").catch((err) => { console.log(`caught the error`) });
         }
     } catch (err){
         logger.error(err);
@@ -120,52 +126,57 @@ async function processImage(imageAttachment: Attachment, bot, channel: string, u
 
     if (downloadImage){ 
         imageName = `${imageName}.${getFileExtension(imageUrl)}`;
-        await downloadImageFromUrl(imageDir, imageUrl, imageName).catch((err) => {throw err});
+        await downloadImageFromUrl(imageDir, imageUrl, imageName);
     } else {
         imageName = imageAttachment.filename;
         imageDir = ``; // image dir is defined in the cache
     }
-    await getDownloadedImage(imageDir, imageUrl, imageName, bot, channel, userName, downloadImage).catch((err) => {throw err});
+    await getDownloadedImage(imageDir, imageUrl, imageName, bot, channel, userName, downloadImage);
 }
 
 async function getDownloadedImage(imageDir: string, url: string, imageName: string, bot, channel: string, userName: string, saveToCache: boolean) {
     var imageNameWithDir = `${imageDir}${imageName}`;
-    return fs.readFile(imageNameWithDir, async function(err, data) {
-        if (err) throw err; // Fail if the file can't be read.
-        
-        if (saveToCache) {
-            imageCache.push(
-                {
-                    FileName: imageNameWithDir,
-                    Timestamp: Date.now(),
-                    ExpiresIn: 3600
-                }
-            );
-        }
-
-        var imageBuffer = data;
-        var image = tf.node.decodeImage(imageBuffer);
-
-        const predictions = await classify(image).catch((err) => {throw err});
-        
-        logger.info(predictions);
-
-        if (!isNull(predictions)){
-            var found = false;
-            predictions.forEach((prediction) => {
-                searchWords.forEach((word) => {
-                    if (prediction.className.includes(word)) {
-                        if (!found){
-                            found = true;
-                            bot.sendMessage({to: channel, message: `I have analysed the last spoiler sent. This is a burger. For your safety do not click, or you will be burgered. ${userName} shame on you!`});
-                        }
+    fs.readFile(imageNameWithDir, async function(err, data) {
+        try {
+            if (err) throw err; // Fail if the file can't be read.
+            
+            if (saveToCache) {
+                imageCache.push(
+                    {
+                        FileName: imageNameWithDir,
+                        Timestamp: Date.now(),
+                        ExpiresIn: 3600
                     }
-                });
-            });
-
-            if (!found) {
-                bot.sendMessage({to: channel, message: `I have analzed the last spoiler sent. I don’t think it has a burger in it.`})
+                );
             }
+
+            var imageBuffer = data;
+            var image = tf.node.decodeImage(imageBuffer);
+
+            const predictions = await classify(image).catch((err) => {throw err});
+            
+            logger.info(predictions);
+
+            if (!isNull(predictions)){
+                var found = false;
+                predictions.forEach((prediction) => {
+                    searchWords.forEach((word) => {
+                        if (prediction.className.includes(word)) {
+                            if (!found){
+                                found = true;
+                                bot.sendMessage({to: channel, message: `I have analysed the last spoiler sent. This is a burger. For your safety do not click, or you will be burgered. ${userName} shame on you!`});
+                            }
+                        }
+                    });
+                });
+
+                if (!found) {
+                    bot.sendMessage({to: channel, message: `I have analzed the last spoiler sent. I don’t think it has a burger in it.`})
+                }
+            }
+        } catch (error) {
+            logger.error(error)
+            bot.sendMessage({to: channel, message: `Something happened and I can’t analyse this. Just blame Eamon`})
         }
     });
 }
@@ -194,13 +205,6 @@ function getFileExtension(url: string){
     return url.split('.').pop();
 }
 
-function getImageUrl(attachment: Attachment){
-    if (isNull(attachment)){
-        throw new Error("No Attachment Provided");
-    }
-    return attachment.url;
-}
-
 function isNull(attachment: any){
     return attachment === undefined || attachment === null;
 }
@@ -220,6 +224,14 @@ function hasComamnd(message: string){
 function getCommand(message: string){
     var args = message.substring(1).split(' ');
     return args[0];
+}
+
+function hasTaggedUser(message: string){
+    return message.includes("<@")
+}
+
+function getTaggedUser(message: string){
+    return message.substring(message.indexOf("<@"));
 }
 
 function startServer(){
