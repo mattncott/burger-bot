@@ -9,13 +9,14 @@
         "dev": "npx nodemon bot.ts"
     },
     "dependencies": {
-        "ts-node": "^10.9.1",
         "@tensorflow-models/mobilenet": "^2.1.0",
         "@tensorflow/tfjs": "^3.19.0",
         "@tensorflow/tfjs-node": "^3.18.0",
         "axios": "^0.27.2",
         "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "dotenv": "^16.0.1",
         "node-gyp": "^9.1.0",
+        "ts-node": "^10.9.1",
         "winston": "^3.8.1"
     },
     "devDependencies": {

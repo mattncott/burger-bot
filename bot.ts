@@ -8,6 +8,14 @@ import axios from "axios";
 import * as fs from "fs";
 import * as tf from "@tensorflow/tfjs-node";
 
+require(`dotenv`).config();
+
+// We need to start a web server for heroku
+startServer();
+
+
+
+
 const commandTrigger = `!`;
 var searchWords = [ `burger` ];
 const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
@@ -212,4 +220,31 @@ function hasComamnd(message: string){
 function getCommand(message: string){
     var args = message.substring(1).split(' ');
     return args[0];
+}
+
+function startServer(){
+    var http = require('http');
+
+    var host = process.env.host;
+
+    if (isNull(host)){
+        throw new Error(`Host cannot be null`);
+    }
+
+    if (host !== 'localhost' && host !== '127.0.0.1'){
+        http = require('https');
+    }
+    
+    const hostname = host;
+    const port = process.env.port || 3000;
+    
+    const server = http.createServer((req, res) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/plain');
+      res.end('Hello, World!\n');
+    });
+    
+    server.listen(port, hostname, () => {
+      console.log(`Server running at http://${hostname}:${port}/`);
+    });
 }
