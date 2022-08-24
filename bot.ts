@@ -252,7 +252,7 @@ function startServer(){
 
     http.createServer(function (req, res) {
         res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.write('Hello World!');
+        res.write('You\'ve been burgered');
         res.end();
       }).listen(port);
 }
