@@ -231,7 +231,9 @@ function startServer(){
         throw new Error(`Host cannot be null`);
     }
 
-    if (host !== 'localhost' && host !== '127.0.0.1'){
+    console.log(process.env.NODE_ENV);
+
+    if (process.env.NODE_ENV === 'production'){
         http = require('https');
     }
     

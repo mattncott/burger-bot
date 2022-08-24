@@ -5,8 +5,7 @@
     "main": "bot.js",
     "author": "Your Name",
     "scripts": {
-        "start": "npx nodemon bot.ts",
-        "dev": "npx nodemon bot.ts"
+        "start": "npx nodemon bot.ts"
     },
     "dependencies": {
         "@tensorflow-models/mobilenet": "^2.1.0",
