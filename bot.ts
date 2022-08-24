@@ -79,6 +79,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
                     `Send messages with the ${commandTrigger} character. 
                     ${commandTrigger}help : this command
                     ${commandTrigger}checklastspoiler : Checks the last spoiler image that I have received
+                    ${commandTrigger}burger <usertoburger> : Burger someone, go on, get Eamon
                     `});
                     break;
                 case `burger`:
