@@ -1,6 +1,6 @@
 export type Attachment = {
     content_type: string;
-    filename: String;
+    filename: string;
     height: number;
     id: string;
     proxy_url: string;

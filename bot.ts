@@ -1,4 +1,5 @@
 import { Attachment } from "./types/Attachment";
+import { ImageCache } from "./types/ImageCache";
 import * as Discord from "discord.io";
 import * as logger from "winston";
 import * as auth from "./auth.json";
@@ -7,8 +8,10 @@ import axios from "axios";
 import * as fs from "fs";
 import * as tf from "@tensorflow/tfjs-node";
 
+const commandTrigger = `!`;
 var searchWords = [ `burger` ];
 const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+var imageCache: ImageCache[] = [];
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -43,7 +46,35 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
                         to: channelID,
                         message: 'Pong!'
                     });
-                break;
+                    break;
+                case `checklastspoiler`:
+                    logger.info(imageCache);
+                    var lastSentSpoiler = imageCache.pop();
+                    
+                    if (isNull(lastSentSpoiler)){
+                        bot.sendMessage({to: channelID, message: `I have not seen a spoiler image recently.`});
+                        return;
+                    }
+
+                    var cachedAttachment: Attachment = {
+                        url: lastSentSpoiler.FileName,
+                        content_type: `image/png`,
+                        filename: lastSentSpoiler.FileName,
+                        height: 0,
+                        id: null,
+                        width: 0,
+                        proxy_url: null,
+                        size: 0
+                    };
+                    checkSpoiler(cachedAttachment, bot, channelID, userID, `I will check the last spoiler image that I can see for a burger`, false);
+                    break;
+                case `help`:
+                    bot.sendMessage({to: channelID, message: 
+                    `Send messages with the ${commandTrigger} character. 
+                    ${commandTrigger}help : this command
+                    ${commandTrigger}checklastspoiler : Checks the last spoiler image that I have received
+                    `});
+                    break;
                 // Just add any case commands if you want to..
             }
         }
@@ -55,8 +86,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
         }
 
         if (hasSpoilerImage(attachment.filename)){
-            bot.sendMessage({to: channelID, message: "I have detected a spoiler image. I will scan this for an attempted burgering"});
-            await processImage(attachment, bot, channelID, `<@${userID}>`);
+            checkSpoiler(attachment, bot, channelID, userID, "I have detected a spoiler image. I will scan this for an attempted burgering");
         }
     } catch (err){
         logger.error(err);
@@ -64,7 +94,12 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
     }
 });
 
-export async function processImage(imageAttachment: Attachment, bot, channel: string, userName: string) {
+async function checkSpoiler(attachment: Attachment, bot, channel: string, userID: string, message: string, downloadImage: boolean = true) {
+    bot.sendMessage({to: channel, message});
+    await processImage(attachment, bot, channel, `<@${userID}>`, downloadImage);
+}
+
+async function processImage(imageAttachment: Attachment, bot, channel: string, userName: string, downloadImage: boolean) {
     var imageType = imageAttachment.content_type;
     var imageUrl = imageAttachment.url;
     
@@ -72,16 +107,34 @@ export async function processImage(imageAttachment: Attachment, bot, channel: st
         throw new Error("Image type not supported");
     }
 
-    var timestamp = Date.now();
+    var imageName = Date.now().toString();
+    var imageDir = `images/`;
 
-    await downloadImageFromUrl(imageUrl, timestamp.toString()).catch((err) => {throw err});
-    await getDownloadedImage(imageUrl, timestamp.toString(), bot, channel, userName).catch((err) => {throw err});
+    if (downloadImage){ 
+        imageName = `${imageName}.${getFileExtension(imageUrl)}`;
+        await downloadImageFromUrl(imageDir, imageUrl, imageName).catch((err) => {throw err});
+    } else {
+        imageName = imageAttachment.filename;
+        imageDir = ``; // image dir is defined in the cache
+    }
+    await getDownloadedImage(imageDir, imageUrl, imageName, bot, channel, userName, downloadImage).catch((err) => {throw err});
 }
 
-async function getDownloadedImage(url: string, imageName: string, bot, channel: string, userName: string) {
-    return fs.readFile(`images/${imageName}.${getFileExtension(url)}`, async function(err, data) {
+async function getDownloadedImage(imageDir: string, url: string, imageName: string, bot, channel: string, userName: string, saveToCache: boolean) {
+    var imageNameWithDir = `${imageDir}${imageName}`;
+    return fs.readFile(imageNameWithDir, async function(err, data) {
         if (err) throw err; // Fail if the file can't be read.
         
+        if (saveToCache) {
+            imageCache.push(
+                {
+                    FileName: imageNameWithDir,
+                    Timestamp: Date.now(),
+                    ExpiresIn: 3600
+                }
+            );
+        }
+
         var imageBuffer = data;
         var image = tf.node.decodeImage(imageBuffer);
 
@@ -115,8 +168,8 @@ async function classify(image: any){
     return predictions;
 }
 
-async function downloadImageFromUrl(url: string, filename: string){
-    var filepath = `images/${filename}.${getFileExtension(url)}`;
+async function downloadImageFromUrl(imageDir: string, url: string, filename: string){
+    var filepath = `${imageDir}${filename}`;
     const response = await axios({
         url,
         method: 'GET',
@@ -153,7 +206,7 @@ function getAttachment(attachments: any): Attachment {
 }
 
 function hasComamnd(message: string){
-    return message.substring(0, 1) == '!';
+    return message.substring(0, 1) == commandTrigger;
 }
 
 function getCommand(message: string){
