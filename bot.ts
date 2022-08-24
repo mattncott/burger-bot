@@ -233,8 +233,7 @@ function startServer(){
 
     console.log(process.env.NODE_ENV);
     
-    const hostname = host;
-    const port = process.env.port || 3000;
+    const port = process.env.PORT || 3000;
     
     logger.info(`listening on port ${port}`)
 
