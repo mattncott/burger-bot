@@ -232,21 +232,15 @@ function startServer(){
     }
 
     console.log(process.env.NODE_ENV);
-
-    if (process.env.NODE_ENV === 'production'){
-        http = require('https');
-    }
     
     const hostname = host;
     const port = process.env.port || 3000;
     
-    const server = http.createServer((req, res) => {
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('Hello, World!\n');
-    });
-    
-    server.listen(port, hostname, () => {
-      console.log(`Server running at http://${hostname}:${port}/`);
-    });
+    logger.info(`listening on port ${port}`)
+
+    http.createServer(function (req, res) {
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.write('Hello World!');
+        res.end();
+      }).listen(port);
 }
