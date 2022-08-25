@@ -6,6 +6,8 @@ import * as tf from "@tensorflow/tfjs-node";
 import { hasSpoilerImage, isNull } from "../Helper";
 import jimp from 'jimp';
 import { DiscordToken } from "../../BurgerBotStart";
+import * as jpeg from "jpeg-js";
+import * as fs from "fs";
 
 const searchWords = [ `burger` ];
 const acceptedImageTypes = ['image/jpeg', 'image/png'];
@@ -56,16 +58,13 @@ async function processImage(imageAttachment: Attachment, bot, channel: string, u
 async function getDownloadedImage(imageDir: string, url: string, imageName: string, bot, channel: string, userName: string, imageType: string) {
     var imageNameWithDir = `${imageDir}${imageName}`;
     var image = await jimp.read(url);
-    // await image.resize(331, 454, jimp.RESIZE_BILINEAR);
 
     var savedFileName = `${imageNameWithDir}.jpg`
     await image.writeAsync(savedFileName);
-    var imageBuffer = await (await jimp.read(savedFileName)).getBufferAsync(imageType);
 
     try {
 
-        var tfImage = tf.node.decodeImage(imageBuffer);
-        var tfImageResized = tf.image.resizeBilinear(tfImage, [331, 454], true, false);
+        var tfImageResized = imageUrlToTensor(savedFileName);
         const predictions = await classify(tfImageResized).catch((err) => {throw err});
         
         if (!isNull(predictions)){
@@ -97,6 +96,27 @@ async function getDownloadedImage(imageDir: string, url: string, imageName: stri
 
     }
 }
+
+function imageUrlToTensor(imageUrl: string): tf.Tensor3D {
+    const image = fs.readFileSync(imageUrl);
+    return imageToTensor(image);
+}
+
+function imageToTensor(rawImageData: ArrayBuffer): tf.Tensor3D {
+    const { width, height, data } = jpeg.decode(rawImageData, {useTArray: true});
+    // Drop the alpha channel info for mobilenet
+    const buffer = new Uint8Array(width * height * 3);
+    let offset = 0; // offset into original data
+    for (let i = 0; i < buffer.length; i += 3) {
+      buffer[i] = data[offset];
+      buffer[i + 1] = data[offset + 1];
+      buffer[i + 2] = data[offset + 2];
+
+      offset += 4;
+    }
+
+    return tf.tensor3d(buffer, [height, width, 3]);
+  }
 
 async function classify(image: any){
     const model = await mobilenet.load().catch((err) => {throw err});
