@@ -14,7 +14,7 @@ require(`dotenv`).config();
 startServer();
 
 
-const commandTrigger = `!`;
+const commandTrigger = `.`;
 var searchWords = [ `burger` ];
 const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
 var imageCache: ImageCache[] = [];
