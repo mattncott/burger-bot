@@ -11,7 +11,10 @@ export function RegisterCommands(){
             .addSubcommand(subcommand =>
                 subcommand
                     .setName('user').setDescription('The person to burger')
-                    .addUserOption(option => option.setName('target').setDescription('The user')))
+                    .addUserOption(option => option.setName('target').setDescription('The user'))),
+        new SlashCommandBuilder()
+            .setName('highscore')
+            .setDescription('Burger Highscores')
     ];
 
     if (IsDevelopmentEnv){

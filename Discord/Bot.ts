@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { DiscordToken } from "../BurgerBotStart";
-import { BurgerCommandHandler } from "./Commands/Burger";
+import Burger from "./Commands/Burger";
+import HighScore from "./Commands/Highscore";
 import { LogInfo } from "./Logger";
 
 export function StartBot() {
@@ -45,11 +46,16 @@ export function StartBot() {
                         await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
                         break;
                     case 'burger':
-                        await BurgerCommandHandler(interaction);
+                        const burgerClass = new Burger(interaction);
+                        await burgerClass.HandleCommand();
+                        break;
+                    case 'highscore':
+                        const highscoreClass = new HighScore(interaction);
+                        await highscoreClass.HandleCommand();
                         break;
                 }
             } catch (error) {
-                LogInfo(error);
+                console.log(error);
                 await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
             }
         });

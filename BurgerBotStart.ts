@@ -16,10 +16,19 @@ ValidateEnvironmentVariables();
 Run();
 
 async function Run(){
+    SetupDevelopmentEnvironment();
     StartBot();
     RegisterCommands();
     StartWebServer();
     ListenForImages();
+}
+
+function SetupDevelopmentEnvironment(){
+    if (IsDevelopmentEnv){
+        process.on('warning', (warning) => {
+            console.log(warning.stack);
+        });
+    }
 }
 
 function ValidateEnvironmentVariables() {
