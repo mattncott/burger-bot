@@ -1,7 +1,7 @@
-import { SlashCommandBuilder, Routes, Client } from 'discord.js';
+import { SlashCommandBuilder, Routes } from 'discord.js';
 import { REST }  from '@discordjs/rest';
-import { DiscordToken, clientId, guildId, IsDevelopmentEnv } from '../BurgerBotStart';
-import { LogInfo } from './Logger';
+import { DiscordToken, clientId, guildId, IsDevelopmentEnv } from '../index';
+import { LogInfo } from '../Logger';
 
 export function RegisterCommands(){
     const commands = [

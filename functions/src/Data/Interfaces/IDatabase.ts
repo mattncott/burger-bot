@@ -1,6 +1,6 @@
-import sequelize from "sequelize";
+import { HighScoreType } from "../../Types/HighScoreType";
 
 export default interface IDatabase {
-    GetAllHighscores(): Promise<sequelize.Model<any, any>[]>;
+    GetAllHighscores(): HighScoreType[];
     SetHighscores(userID: string, incrementNumberOfTimesBurgered: boolean): Promise<void>;
 }

@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, userMention } from "discord.js";
 import BaseCommand from "./BaseCommand";
 import ICommand from "./interfaces/ICommand";
 
-export default class Burger extends BaseCommand implements ICommand{
+export default class Burger extends BaseCommand implements ICommand {
 
     private _interaction: ChatInputCommandInteraction;
 
@@ -15,8 +15,14 @@ export default class Burger extends BaseCommand implements ICommand{
 
     public async HandleCommand()
     {
-        var targetUser = this._interaction.options.getUser('target');
-        var sendingUser = this._interaction.user;
+        let targetUser = this._interaction.options.getUser('target');
+
+        const sendingUser = this._interaction.user;
+
+        if (targetUser === null) {
+            targetUser = sendingUser;
+        }
+
         await this._database.SetHighscores(targetUser.id, true);
         await this._database.SetHighscores(sendingUser.id, false);
         
