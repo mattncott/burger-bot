@@ -1,5 +1,5 @@
-import FirebaseDatabase from "../../Data/FirebaseDatabase";
 import IDatabase from "../../Data/Interfaces/IDatabase";
+import SequelizeDatabase from "../../Data/SequelizeDatabase";
 
 export default class BaseCommand 
 {
@@ -8,6 +8,6 @@ export default class BaseCommand
 
     constructor()
     {
-        this._database = new FirebaseDatabase();
+        this._database = new SequelizeDatabase();
     }
 }
