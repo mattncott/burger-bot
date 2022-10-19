@@ -1,0 +1,9 @@
+version: '3'
+services:
+
+  burgerbot:
+    depends_on: 
+      - sqlite3
+    container_name: burger-bot
+    build: .
+    

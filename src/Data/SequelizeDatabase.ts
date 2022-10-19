@@ -1,6 +1,8 @@
 import { Sequelize } from "sequelize";
 import * as sequelize from "sequelize";
-import IDatabase from "./interfaces/IDatabase";
+import IDatabase from "./Interfaces/IDatabase";
+import { DatabaseHost, DatabaseType, IsDevelopmentEnv } from "..";
+import { DatabaseTypeEnum } from "../Types/DatabaseType";
 
 export default class SequelizeDatabase implements IDatabase
 {
@@ -54,15 +56,28 @@ export default class SequelizeDatabase implements IDatabase
 
     private SetupDatabase(){
 
-        const logging = process.env.NODE_ENV !== 'production' ? console.log : false;
+        const logging = IsDevelopmentEnv ? console.log : false;
 
-        return new Sequelize('database', 'user', 'password', {
-            host: process.env.databasehost,
-            dialect: 'sqlite',
+        var options = {
+            host: DatabaseHost,
+            dialect: DatabaseType,
             logging,
-            // SQLite only
-            storage: 'database.sqlite',
-        });
+        } as sequelize.Options;
+
+        if (DatabaseType === DatabaseTypeEnum.Sqlite)
+        {
+            options.storage = DatabaseHost;
+            return new Sequelize('database', 'user', 'password', options);
+        }
+
+        const DbUser = process.env.DbUser;
+        const DbPassword = process.env.DbPassword;
+
+        if (DbUser === undefined || DbUser === null){
+            throw new Error("Database Username not provided in env.")
+        }
+
+        return new Sequelize('burger-bot', DbUser, DbPassword, options);
     }
 
 }
