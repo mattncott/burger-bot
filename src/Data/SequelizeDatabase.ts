@@ -136,7 +136,7 @@ export default class SequelizeDatabase implements IDatabase
     }
 
     public async CreateShopItem(id: number, name: string, price: number): Promise<void>{
-        const shopItemExists = this._shopItems.findByPk(id);
+        const shopItemExists = await this._shopItems.findByPk(id);
 
         if (!shopItemExists){
             await this._shopItems.create({ id, name, price });

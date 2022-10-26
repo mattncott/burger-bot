@@ -67,5 +67,11 @@ async function ValidateDatabase() {
     console.log('Database validated');
 
     // Setup the shop
-    await database.CreateShopItem(ShopItems.Shield, "Shield", 10)
+    try {
+        await database.CreateShopItem(ShopItems.Shield, "Shield", 10);
+
+        console.log('Shop is setup')
+    } catch (error) {
+        console.error(error)
+    }
 }
