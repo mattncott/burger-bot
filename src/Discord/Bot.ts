@@ -1,8 +1,11 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { DiscordToken } from "../index";
-import { LogError, LogInfo } from "../Logger";
+import { LogError } from "../Logger";
+import Balance from "./Commands/Balance";
 import Burger from "./Commands/Burger";
 import HighScore from "./Commands/Highscore";
+import Shop from "./Commands/Shop";
+import User from "./User";
 
 export function StartBot() {
     (async () => {
@@ -13,7 +16,7 @@ export function StartBot() {
 
             // When the client is ready, run this code (only once)
             client.once('ready', () => {
-                LogInfo('Ready!');
+                console.log('Bot is online!');
             });
 
             client.on('interactionCreate', async interaction => {
@@ -21,6 +24,10 @@ export function StartBot() {
     
                 try {                
                     const { commandName } = interaction;
+
+                    // When a user sends a command, add them to the system.
+                    const userClass = new User(interaction);
+                    userClass.AddUser();
                 
                     switch (commandName) {
                         case 'ping':
@@ -39,6 +46,14 @@ export function StartBot() {
                         case 'highscore':
                             const highscoreClass = new HighScore(interaction);
                             await highscoreClass.HandleCommand();
+                            break;
+                        case 'balance':
+                            const balanceClass = new Balance(interaction);
+                            await balanceClass.HandleCommand();
+                            break;
+                        case 'shop':
+                            const shopClass = new Shop(interaction);
+                            await shopClass.HandleCommand();
                             break;
                     }
                 } catch (error) {

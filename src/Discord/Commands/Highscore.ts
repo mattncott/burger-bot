@@ -17,7 +17,6 @@ export default class HighScore extends BaseCommand implements ICommand{
     public async HandleCommand()
     {
         var highscores = await this._database.GetAllHighscores();
-        console.log(highscores);
 
         const tableResponse: string[] = [];
         

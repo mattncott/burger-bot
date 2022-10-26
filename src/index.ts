@@ -1,3 +1,4 @@
+import SequelizeDatabase from "./Data/SequelizeDatabase";
 import { StartBot } from "./Discord/Bot";
 import { RegisterCommands } from "./Discord/CommandRegister";
 import { isNull } from "./Helper";
@@ -19,6 +20,7 @@ Run();
 
 async function Run(){
     SetupDevelopmentEnvironment();
+    await ValidateDatabase();
     StartBot();
     RegisterCommands();
     // TODO Add image listener back
@@ -56,4 +58,10 @@ function ValidateEnvironmentVariables(): void {
     if (!allowedDatabaseTypes.includes(DatabaseType as DatabaseTypeEnum)){
         throw new Error("Non supported database type");
     }
+}
+
+async function ValidateDatabase() {
+    const database = new SequelizeDatabase();
+    await database.ValidateDatabase();
+    console.log('Database validated');
 }

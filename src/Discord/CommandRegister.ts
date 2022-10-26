@@ -14,7 +14,17 @@ export function RegisterCommands(){
                     .addUserOption(option => option.setName('target').setDescription('The user'))),
         new SlashCommandBuilder()
             .setName('highscore')
-            .setDescription('Burger Highscores')
+            .setDescription('Burger Highscores'),
+        new SlashCommandBuilder()
+            .setName('balance')
+            .setDescription('See your balance in crypto burger coins'),
+        new SlashCommandBuilder()
+            .setName('shop')
+            .setDescription('See what you can buy in the shop.')
+            .addIntegerOption(option =>
+                option
+                    .setName('item')
+                    .setDescription('What you would like to buy')),
     ];
 
     if (IsDevelopmentEnv){

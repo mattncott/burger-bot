@@ -3,12 +3,15 @@ import * as sequelize from "sequelize";
 import IDatabase from "./Interfaces/IDatabase";
 import { DatabaseHost, DatabaseType, IsDevelopmentEnv } from "..";
 import { DatabaseTypeEnum } from "../Types/DatabaseType";
+import { User } from "../Types/User";
 
 export default class SequelizeDatabase implements IDatabase
 {
 
     private _database: Sequelize;
     private _highScores;
+    private _wallets;
+    private _users;
 
     constructor()
     {
@@ -22,13 +25,23 @@ export default class SequelizeDatabase implements IDatabase
             numberOfTimesBurgered: { type: sequelize.INTEGER, defaultValue: 0 },
         });
 
-        this._highScores.sync();
+        this._wallets = this._database.define('wallets',
+        {
+            id: { type: sequelize.STRING, unique: true, primaryKey: true },
+            amountInWallet: { type: sequelize.INTEGER, defaultValue: 15 }
+        });
+
+        this._users = this._database.define('users', 
+        {
+            id: { type: sequelize.STRING, unique: true, primaryKey: true },
+            coolDown: { type: sequelize.DATE },
+            hasShield: { type: sequelize.BOOLEAN, defaultValue: false },
+        });
     }
 
     public async GetAllHighscores(): Promise<any>
     {
-        this._highScores.sync();
-
+        await this._highScores.sync({ alter: true });
         return await this._highScores.findAll();
     }
 
@@ -49,9 +62,70 @@ export default class SequelizeDatabase implements IDatabase
 
     }
 
+    public async CreateUser(userId: string): Promise<void> {
+        await this._users.create( { id: userId } );
+        await this.CreateUserWallet(userId);
+    }
+
+    public async GetUser(userId: string): Promise<any> {
+        return await this._users.findOne( { where: { id: userId } } );
+    }
+
+    public async SetUserCooldown(userId: string): Promise<void> {
+        const date = new Date();
+        date.setMinutes(date.getMinutes() + 10);
+
+        this._users.update( { coolDown: date }, { where: { id: userId } });
+    }
+
+    public async GetUserCooldown(userId: string): Promise<Date> {
+        const user = await this.GetUser(userId) as User;
+
+        if (user === null){
+            throw new Error('No user exists');
+        }
+
+        return user.coolDown;
+    }
+
+    public async UpdateUserWallet(userId: string, newAmount: number): Promise<void> {
+        this._wallets.update({ amountInWallet: newAmount }, { where: { id: userId } });
+    }
+
+    public async GetUserWallet(userId: string): Promise<any> {
+        if (userId === undefined || userId === null){
+            return;
+        }
+
+        return await this._wallets.findOne( { where: { id: userId } } );
+    }
+
+    private async CreateUserWallet(userId: string): Promise<void>{
+        if (userId === undefined || userId === null){
+            return;
+        }
+
+        await this._wallets.create( { id: userId } );
+    }
+
+    public async SetUserShield(userId: string, hasShield: boolean): Promise<void> {
+        await this._users.update( { hasShield }, {where: { id: userId }});
+    }
+
+    public async GetUserShieldStatus(userId: string): Promise<boolean> {
+        const user = await this.GetUser(userId);
+        return user?.hasShield;
+    }
+
     private async GetUserHighScore(userId: string)
     {
         return await this._highScores.findOne( { where: { id: userId } } );
+    }
+
+    public async ValidateDatabase(){
+        await this._highScores.sync({ alter: true });
+        await this._users.sync({ alter: true });
+        await this._wallets.sync({ alter: true });
     }
 
     private SetupDatabase(){
