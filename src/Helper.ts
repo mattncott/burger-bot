@@ -23,3 +23,21 @@ export function hasTaggedUser(message: string){
 export function getTaggedUser(message: string){
     return message.substring(message.indexOf("<@"));
 }
+
+export function IsUserOnCooldown(userCooldown: Date): boolean {
+
+    if (userCooldown !== null && userCooldown !== undefined) {
+        const now = new Date();
+        return userCooldown > now;
+    }
+
+    return false;
+}
+
+export function TimeDifferenceInMinutes(dt2: Date) 
+{
+    const dt1 = new Date();
+    var diff =(dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= 60;
+    return Math.abs(Math.round(diff));
+}

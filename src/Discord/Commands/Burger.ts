@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, userMention } from "discord.js";
+import { IsUserOnCooldown, TimeDifferenceInMinutes } from "../../Helper";
 import BaseCommand from "./BaseCommand";
 import ICommand from "./interfaces/ICommand";
 
@@ -27,9 +28,10 @@ export default class Burger extends BaseCommand implements ICommand {
 
         const user = await this._database.GetUser(sendingUser.id);
 
-        if (!(await this.CanSendABurger(user.coolDown))) {
+        if (IsUserOnCooldown(user.coolDown)) {
             this._interaction.reply({
-                content: `You can't send a Burger right now. You're on a cooldown for ${this.TimeDifferenceInMinutes(user.coolDown)} minutes`
+                content: `You can't send a Burger right now. You're on a cooldown for ${TimeDifferenceInMinutes(user.coolDown)} minutes`,
+                ephemeral: true
             });
             return;
         }
@@ -54,25 +56,5 @@ export default class Burger extends BaseCommand implements ICommand {
         await this._database.UpdateUserWallet(sendingUser.id, userWallet.amountInWallet + this._successfulBurgerPrice)
         
         await this._interaction.reply(`${userMention(sendingUser.id)} just burgered ${userMention(targetUser.id)}`);
-    }
-
-    private async CanSendABurger(userCooldown: Date): Promise<boolean> {
-
-        if (userCooldown !== null && userCooldown !== undefined) {
-            const now = new Date();
-            console.log(now);
-            console.log(userCooldown);
-            return userCooldown < now;
-        }
-
-        return true;
-    }
-
-    private TimeDifferenceInMinutes(dt2: Date) 
-    {
-        const dt1 = new Date();
-        var diff =(dt2.getTime() - dt1.getTime()) / 1000;
-        diff /= 60;
-        return Math.abs(Math.round(diff));
     }
 }

@@ -5,6 +5,7 @@ import Balance from "./Commands/Balance";
 import Burger from "./Commands/Burger";
 import HighScore from "./Commands/Highscore";
 import Shop from "./Commands/Shop";
+import Status from "./Commands/Status";
 import User from "./User";
 
 export function StartBot() {
@@ -54,6 +55,10 @@ export function StartBot() {
                         case 'shop':
                             const shopClass = new Shop(interaction);
                             await shopClass.HandleCommand();
+                            break;
+                        case 'status':
+                            const statusClass = new Status(interaction);
+                            await statusClass.HandleCommand();
                             break;
                     }
                 } catch (error) {

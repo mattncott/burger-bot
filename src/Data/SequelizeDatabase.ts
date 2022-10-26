@@ -12,6 +12,7 @@ export default class SequelizeDatabase implements IDatabase
     private _highScores;
     private _wallets;
     private _users;
+    private _shopItems;
 
     constructor()
     {
@@ -37,6 +38,12 @@ export default class SequelizeDatabase implements IDatabase
             coolDown: { type: sequelize.DATE },
             hasShield: { type: sequelize.BOOLEAN, defaultValue: false },
         });
+
+        this._shopItems = this._database.define('shopItems', {
+            id: { type: sequelize.INTEGER, unique: true, primaryKey: true },
+            name: { type: sequelize.STRING, allowNull: false },
+            price: { type: sequelize.INTEGER, allowNull: false }
+        })
     }
 
     public async GetAllHighscores(): Promise<any>
@@ -117,15 +124,28 @@ export default class SequelizeDatabase implements IDatabase
         return user?.hasShield;
     }
 
-    private async GetUserHighScore(userId: string)
-    {
-        return await this._highScores.findOne( { where: { id: userId } } );
-    }
-
     public async ValidateDatabase(){
         await this._highScores.sync({ alter: true });
         await this._users.sync({ alter: true });
         await this._wallets.sync({ alter: true });
+        await this._shopItems.sync({ alter: true });
+    }
+
+    public async GetAllShopItems(): Promise<any> {
+        return this._shopItems.findAll();
+    }
+
+    public async CreateShopItem(id: number, name: string, price: number): Promise<void>{
+        const shopItemExists = this._shopItems.findByPk(id);
+
+        if (!shopItemExists){
+            await this._shopItems.create({ id, name, price });
+        }
+    }
+
+    private async GetUserHighScore(userId: string)
+    {
+        return await this._highScores.findOne( { where: { id: userId } } );
     }
 
     private SetupDatabase(){

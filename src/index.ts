@@ -3,6 +3,7 @@ import { StartBot } from "./Discord/Bot";
 import { RegisterCommands } from "./Discord/CommandRegister";
 import { isNull } from "./Helper";
 import { DatabaseTypeEnum } from "./Types/DatabaseType";
+import { ShopItems } from "./Types/ShopItems";
 
 require(`dotenv`).config();
 
@@ -64,4 +65,7 @@ async function ValidateDatabase() {
     const database = new SequelizeDatabase();
     await database.ValidateDatabase();
     console.log('Database validated');
+
+    // Setup the shop
+    await database.CreateShopItem(ShopItems.Shield, "Shield", 10)
 }

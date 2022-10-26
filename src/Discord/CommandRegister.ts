@@ -25,6 +25,9 @@ export function RegisterCommands(){
                 option
                     .setName('item')
                     .setDescription('What you would like to buy')),
+        new SlashCommandBuilder()
+            .setName('status')
+            .setDescription('See your current status'),
     ];
 
     if (IsDevelopmentEnv){

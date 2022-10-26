@@ -10,4 +10,6 @@ export default interface IDatabase {
     SetUserShield(userId: string, hasShield: boolean): Promise<void>;
     UpdateUserWallet(userId: string, newAmount: number): Promise<void>;
     GetUserShieldStatus(userId: string): Promise<boolean>;
+    CreateShopItem(id: number, name: string, price: number): Promise<void>;
+    GetAllShopItems(): Promise<any>;
 }
