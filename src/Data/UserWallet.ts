@@ -16,12 +16,10 @@ export class UserWallet implements IUserWallet {
     }
 
     public async IncreaseUserWallet(userId: string): Promise<void> {
-        const userWallet = await this._database.GetUserWallet(userId);
-
         // TODO Does the user have any wallet multipliers??? If so increase this value
         var walletIncreaseBy = this._baseWalletIncrease;
 
-        await this._database.UpdateUserWallet(userId, userWallet.amountInWallet + walletIncreaseBy)
+        await this.IncreaseUserWalletByAmount(userId, walletIncreaseBy);
     }
 
     public async DecreaseUserWallet(userId: string, walletDecreaseBy: number): Promise<void> {
@@ -31,6 +29,20 @@ export class UserWallet implements IUserWallet {
             throw new Error ("Cannot Purchase, not enough money in wallet.");
         }
 
-        await this._database.UpdateUserWallet(userId, userWallet.amountInWallet - walletDecreaseBy)
+        await this.UpdateWalletAmount(userId, userWallet.amountInWallet - walletDecreaseBy);
+    }
+
+    public async CheckTheresEnoughMoneyInWallet(userId: string, amountToCheck: number): Promise<boolean>{
+        const userWallet = await this._database.GetUserWallet(userId);
+        return userWallet.amountInWallet >= amountToCheck;
+    }
+
+    public async IncreaseUserWalletByAmount(userId: string, increaseByAmount: number): Promise<void>{
+        const userWallet = await this._database.GetUserWallet(userId);
+        await this.UpdateWalletAmount(userId, userWallet.amountInWallet + increaseByAmount);
+    }
+
+    private async UpdateWalletAmount(userId: string, amount: number): Promise<void>{
+        await this._database.UpdateUserWallet(userId, amount);
     }
 }

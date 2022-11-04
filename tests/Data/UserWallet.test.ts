@@ -56,5 +56,31 @@ describe('UserWallet tests', () => {
     expect(databaseMock.UpdateUserWallet).toHaveBeenCalledWith(userId, 11);
   });
 
+  test('When user does not have enough money, returns false', async () => {
+    const userId = "1";
+    databaseMock.GetUserWallet.mockReturnValue(Promise.resolve({
+        id: "1",
+        amountInWallet: 5,
+        userId: userId,
+    } as UserWalletType));
+
+    const result = await userWallet.CheckTheresEnoughMoneyInWallet(userId, 10);
+
+    expect(result).toBeFalsy();
+  });
+
+  test('When user does have enough money, returns true', async () => {
+    const userId = "1";
+    databaseMock.GetUserWallet.mockReturnValue(Promise.resolve({
+        id: "1",
+        amountInWallet: 15,
+        userId: userId,
+    } as UserWalletType));
+
+    const result = await userWallet.CheckTheresEnoughMoneyInWallet(userId, 10);
+
+    expect(result).toBeTruthy();
+  });
+
 
 });

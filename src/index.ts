@@ -54,7 +54,8 @@ async function ValidateDatabase() {
 
     // Setup the shop
     try {
-        await database.CreateShopItem(ShopItems.Shield, "Shield", 10);
+        await database.CreateShopItem(ShopItems.Shield, "Shield", 10, "Protect yourself from one burgering");
+        await database.CreateShopItem(ShopItems.ShieldPenetrator, "Shield Penetrator", 10, "One time use, ignores a players shield status. Note: If you own a shield, you can't buy this");
 
         console.log('Shop is setup')
     } catch (error) {

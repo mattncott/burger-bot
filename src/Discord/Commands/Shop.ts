@@ -57,6 +57,10 @@ export default class Shop extends BaseCommand implements ICommand{
                 await this._database.SetUserShield(user.id, true);
             }
 
+            if (item === ShopItems.ShieldPenetrator){
+                await this._database.SetUserShieldPenetratorStatus(user.id, true);
+            }
+
             await this._userWallet.DecreaseUserWallet(user.id, shopItem.price);
 
             this._interaction.reply({
@@ -88,6 +92,14 @@ export default class Shop extends BaseCommand implements ICommand{
             return false;
         }
 
+        if (item.id === ShopItems.ShieldPenetrator && user.hasShield){
+            this._interaction.reply({
+                content: `You can't currently buy this. You already have a shield enabled`,
+                ephemeral: true
+            });
+            return false;
+        }
+
         return true;
     }
 
@@ -105,7 +117,7 @@ export default class Shop extends BaseCommand implements ICommand{
     {
         const shopItemsAsString: string[] = [];
 
-        shopItems.forEach((item: ShopItem) => shopItemsAsString.push(`${item.id}. ${item.name} = ${item.price}bc \n `));
+        shopItems.forEach((item: ShopItem) => shopItemsAsString.push(`------------------------\n ${item.id}. ${item.name} = ${item.price}bc \n ${item.description} \n`));
 
         return shopItemsAsString;
     }

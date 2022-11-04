@@ -10,10 +10,10 @@ import { ChatInputCommandInteraction, CommandInteractionOptionResolver, User } f
 
 describe('Burger Command tests', () => {
 
-  const mockDatabase = mock<IDatabase>();
-  const mockUserWallet = mock<IUserWallet>();
-  const mockInteraction = mock<ChatInputCommandInteraction>();
-  const burgerClass = new Burger(mockInteraction, mockDatabase, mockUserWallet);
+  let mockDatabase = mock<IDatabase>();
+  let mockUserWallet = mock<IUserWallet>();
+  let mockInteraction = mock<ChatInputCommandInteraction>();
+  let burgerClass = new Burger(mockInteraction, mockDatabase, mockUserWallet);
 
   const mockUser = mock<User>();
 
@@ -22,6 +22,8 @@ describe('Burger Command tests', () => {
     mockInteraction.user = mockUser;
 
     mockDatabase.GetUserShieldStatus.mockReturnValue(Promise.resolve(false));
+    mockDatabase.GetUserShieldPenetratorStatus.mockReturnValue(Promise.resolve(false));
+    burgerClass = new Burger(mockInteraction, mockDatabase, mockUserWallet);
   });
 
   test('Burger when on cooldown does not update database', async () => {
@@ -91,6 +93,7 @@ describe('Burger Command tests', () => {
 
     expect(mockDatabase.SetHighscores).toHaveBeenCalledTimes(1);
     expect(mockDatabase.SetUserShield).toHaveBeenCalledTimes(1);
+    expect(mockDatabase.SetUserShieldPenetratorStatus).toHaveBeenCalledTimes(0);
     expect(mockDatabase.SetUserCooldown).toHaveBeenCalledTimes(1);
   });
 
@@ -132,6 +135,46 @@ describe('Burger Command tests', () => {
     await burgerClass.HandleCommand();
 
     expect(mockInteraction.reply).toHaveBeenCalledWith(`<@1> just burgered <@2>`);
+  });
+
+  test('User has shield penetrator but target does not have a shield', async () => {
+    mockDatabase.GetUser.mockReturnValue(Promise.resolve({} as UserType));
+    
+    const handleGetTargetUser = jest.spyOn(Burger.prototype as any, 'GetTargetUser');
+    handleGetTargetUser.mockImplementation(() => {
+      const user = mock<User>();
+      user.id = "2";
+      return user;
+    });
+
+    mockDatabase.GetUserShieldPenetratorStatus.mockReturnValue(Promise.resolve(true));
+
+    await burgerClass.HandleCommand();
+
+    expect(mockDatabase.SetHighscores).toHaveBeenCalledTimes(2);
+    expect(mockDatabase.SetUserShieldPenetratorStatus).toHaveBeenCalledTimes(1);
+    expect(mockDatabase.SetUserCooldown).toHaveBeenCalledTimes(1);
+    expect(mockUserWallet.IncreaseUserWallet).toHaveBeenCalledTimes(1);
+
+    expect(mockInteraction.reply).toHaveBeenCalledWith(`Rippage <@1> wasted their shield penetrator and just burgered <@2>, they did not have a shield`);
+  });
+
+  test('User has shield penetrator and target does have a shield', async () => {
+    mockDatabase.GetUser.mockReturnValue(Promise.resolve({} as UserType));
+
+    mockDatabase.GetUserShieldPenetratorStatus.mockReturnValue(Promise.resolve(true));
+    mockDatabase.GetUserShieldStatus.mockReturnValue(Promise.resolve(true));
+    
+    const handleGetTargetUser = jest.spyOn(Burger.prototype as any, 'GetTargetUser');
+    handleGetTargetUser.mockImplementation(() => {
+      const user = mock<User>();
+      user.id = "2";
+      return user;
+    });
+
+    await burgerClass.HandleCommand();
+
+    expect(mockInteraction.reply).toHaveBeenCalledWith(`<@1> used their shield penetrator and just burgered <@2>`);
   });
 
 });

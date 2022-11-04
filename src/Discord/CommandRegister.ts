@@ -28,6 +28,10 @@ export function RegisterCommands(){
         new SlashCommandBuilder()
             .setName('status')
             .setDescription('See your current status'),
+        new SlashCommandBuilder()
+            .setName('gamble')
+            .setDescription('Wager a bet? Will you burger yourself or someone random?')
+            .addIntegerOption(option => option.setRequired(true).setName('wager').setDescription('How much are you betting?'))
     ];
 
     if (IsDevelopmentEnv){

@@ -37,12 +37,14 @@ export default class SequelizeDatabase implements IDatabase
             id: { type: sequelize.STRING, unique: true, primaryKey: true },
             coolDown: { type: sequelize.DATE },
             hasShield: { type: sequelize.BOOLEAN, defaultValue: false },
+            hasShieldPenetrator: { type: sequelize.BOOLEAN, defaultValue: false },
         });
 
         this._shopItems = this._database.define('shopItems', {
             id: { type: sequelize.INTEGER, unique: true, primaryKey: true },
             name: { type: sequelize.STRING, allowNull: false },
-            price: { type: sequelize.INTEGER, allowNull: false }
+            price: { type: sequelize.INTEGER, allowNull: false },
+            description: { type: sequelize.STRING, allowNull: true }
         })
     }
 
@@ -128,19 +130,33 @@ export default class SequelizeDatabase implements IDatabase
         await this._highScores.sync({ alter: true });
         await this._users.sync({ alter: true });
         await this._wallets.sync({ alter: true });
-        await this._shopItems.sync({ alter: true });
+        await this._shopItems.sync({ force: true });
     }
 
     public async GetAllShopItems(): Promise<any> {
         return this._shopItems.findAll();
     }
 
-    public async CreateShopItem(id: number, name: string, price: number): Promise<void>{
+    public async CreateShopItem(id: number, name: string, price: number, description: string): Promise<void>{
         const shopItemExists = await this._shopItems.findByPk(id);
 
         if (!shopItemExists){
-            await this._shopItems.create({ id, name, price });
+            await this._shopItems.create({ id, name, price, description });
         }
+    }
+
+    public async GetUserShieldPenetratorStatus(userId: string): Promise<boolean>
+    {
+        const user = await this.GetUser(userId);
+        return user?.hasShieldPenetrator;
+    }
+
+    public async SetUserShieldPenetratorStatus(userId: string, hasShieldPenetrator: boolean): Promise<void>{
+        await this._users.update( { hasShieldPenetrator }, {where: { id: userId }});
+    }
+
+    public async GetAllUserIds(): Promise<any>{
+        return await this._highScores.findAll({ attributes: ['id'] });
     }
 
     private async GetUserHighScore(userId: string)

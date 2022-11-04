@@ -4,6 +4,7 @@ import { LogError } from "../Logger";
 import Balance from "./Commands/Balance";
 import Burger from "./Commands/Burger";
 import HighScore from "./Commands/Highscore";
+import Gamble from "./Commands/Gamble";
 import Shop from "./Commands/Shop";
 import Status from "./Commands/Status";
 import User from "./User";
@@ -59,6 +60,10 @@ export function StartBot() {
                         case 'status':
                             const statusClass = new Status(interaction);
                             await statusClass.HandleCommand();
+                            break;
+                        case 'gamble':
+                            const rouletteClass = new Gamble(interaction);
+                            await rouletteClass.HandleCommand();
                             break;
                     }
                 } catch (error) {
