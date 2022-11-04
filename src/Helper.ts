@@ -16,14 +16,6 @@ export function getAttachment(attachments: any): Attachment {
     return attachments.attachments[0];
 }
 
-export function hasTaggedUser(message: string){
-    return message.includes("<@")
-}
-
-export function getTaggedUser(message: string){
-    return message.substring(message.indexOf("<@"));
-}
-
 export function IsUserOnCooldown(userCooldown: Date): boolean {
 
     if (userCooldown !== null && userCooldown !== undefined) {

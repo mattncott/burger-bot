@@ -9,9 +9,9 @@ export default class BaseCommand
     protected readonly _database: IDatabase;
     protected readonly _userWallet: IUserWallet;
 
-    constructor()
+    constructor(database?: IDatabase, userWallet?: IUserWallet)
     {
-        this._database = new SequelizeDatabase();
-        this._userWallet = new UserWallet(this._database);
+        this._database = database === null || database === undefined ? new SequelizeDatabase() : database;
+        this._userWallet = userWallet === null || userWallet === undefined ? new UserWallet(this._database) : userWallet;
     }
 }

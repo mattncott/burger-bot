@@ -1,4 +1,4 @@
-import { EnvironmentMode } from ".";
+import { EnvironmentMode } from "./Environment";
 
 export function LogInfo(message: any) {
     if (EnvironmentMode === 'production') return;

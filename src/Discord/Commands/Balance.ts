@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction } from "discord.js";
+import IDatabase from "../../Data/Interfaces/IDatabase";
 import BaseCommand from "./BaseCommand";
 import ICommand from "./interfaces/ICommand";
 
@@ -6,9 +7,9 @@ export default class Balance extends BaseCommand implements ICommand{
 
     private _interaction: ChatInputCommandInteraction;
 
-    constructor(interaction: ChatInputCommandInteraction)
+    constructor(interaction: ChatInputCommandInteraction, database?: IDatabase)
     {
-        super();
+        super(database);
 
         this._interaction = interaction;
     }

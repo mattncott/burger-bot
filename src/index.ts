@@ -1,20 +1,10 @@
 import SequelizeDatabase from "./Data/SequelizeDatabase";
 import { StartBot } from "./Discord/Bot";
 import { RegisterCommands } from "./Discord/CommandRegister";
+import { EnvironmentMode, IsDevelopmentEnv, DiscordToken, guildId, clientId, DatabaseType } from "./Environment";
 import { isNull } from "./Helper";
 import { DatabaseTypeEnum } from "./Types/DatabaseType";
 import { ShopItems } from "./Types/ShopItems";
-
-require(`dotenv`).config();
-
-export const EnvironmentMode = isNull(process.env.NODE_ENV) ? 'production' : process.env.NODE_ENV;
-export const DiscordToken = getEnvironmentVar(process.env.token);
-export const guildId = getEnvironmentVar(process.env.guildid);
-export const clientId = getEnvironmentVar(process.env.clientid);
-export const DatabaseHost = isNull(process.env.databasehost) ? 'database.sqlite' : getEnvironmentVar(process.env.databasehost);
-export const DatabaseType = isNull(process.env.databasetype) ? 'sqlite' : getEnvironmentVar(process.env.databasetype);
-
-export const IsDevelopmentEnv = EnvironmentMode !== 'production';
 
 ValidateEnvironmentVariables();
 Run();
@@ -35,10 +25,6 @@ function SetupDevelopmentEnvironment(): void{
             console.log(warning.stack);
         });
     }
-}
-
-function getEnvironmentVar(environmentVar: undefined | string): string {
-    return environmentVar === undefined ? "" : environmentVar;
 }
 
 function ValidateEnvironmentVariables(): void {

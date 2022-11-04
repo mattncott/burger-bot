@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { DiscordToken } from "../index";
+import { DiscordToken } from "../Environment";
 import { LogError } from "../Logger";
 import Balance from "./Commands/Balance";
 import Burger from "./Commands/Burger";

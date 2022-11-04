@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 import * as sequelize from "sequelize";
 import IDatabase from "./Interfaces/IDatabase";
-import { DatabaseHost, DatabaseType, IsDevelopmentEnv } from "..";
+import { DatabaseHost, DatabaseType, IsDevelopmentEnv } from "../Environment";
 import { DatabaseTypeEnum } from "../Types/DatabaseType";
 import { User } from "../Types/User";
 

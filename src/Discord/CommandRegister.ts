@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, Routes } from 'discord.js';
 import { REST }  from '@discordjs/rest';
-import { DiscordToken, clientId, guildId, IsDevelopmentEnv } from '../index';
+import { DiscordToken, clientId, guildId, IsDevelopmentEnv } from '../Environment';
 import { LogInfo } from '../Logger';
 
 export function RegisterCommands(){

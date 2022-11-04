@@ -1,4 +1,6 @@
 import { ChatInputCommandInteraction, userMention } from "discord.js";
+import IDatabase from "../../Data/Interfaces/IDatabase";
+import IUserWallet from "../../Data/Interfaces/IUserWallet";
 import { IsUserOnCooldown, TimeDifferenceInMinutes } from "../../Helper";
 import BaseCommand from "./BaseCommand";
 import ICommand from "./interfaces/ICommand";
@@ -7,17 +9,21 @@ export default class Burger extends BaseCommand implements ICommand {
 
     private _interaction: ChatInputCommandInteraction;
 
-
-    constructor(interaction: ChatInputCommandInteraction)
+    constructor(interaction: ChatInputCommandInteraction, database?: IDatabase, userWallet?: IUserWallet)
     {
-        super();
+        super(database, userWallet);
 
         this._interaction = interaction;
     }
 
+    private GetTargetUser()
+    {
+        return this._interaction.options.getUser('target');
+    }
+
     public async HandleCommand()
     {
-        let targetUser = this._interaction.options.getUser('target');
+        let targetUser = this.GetTargetUser();
 
         const sendingUser = this._interaction.user;
 
