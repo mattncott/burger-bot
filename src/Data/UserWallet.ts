@@ -11,6 +11,10 @@ export class UserWallet implements IUserWallet {
         this._database = database;
     }
 
+    public async Get(userId: string): Promise<any> {
+        return await this._database.GetUserWallet(userId);
+    }
+
     public async IncreaseUserWallet(userId: string): Promise<void> {
         const userWallet = await this._database.GetUserWallet(userId);
 

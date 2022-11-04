@@ -1,4 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
+import IDatabase from "../../Data/Interfaces/IDatabase";
+import IUserWallet from "../../Data/Interfaces/IUserWallet";
 import { IsUserOnCooldown, TimeDifferenceInMinutes } from "../../Helper";
 import { ShopItem, ShopItems } from "../../Types/ShopItems";
 import BaseCommand from "./BaseCommand";
@@ -9,16 +11,20 @@ export default class Shop extends BaseCommand implements ICommand{
     private _interaction: ChatInputCommandInteraction;
     private _shopItems: any = null;
 
-    constructor(interaction: ChatInputCommandInteraction)
+    constructor(interaction: ChatInputCommandInteraction, database?: IDatabase, userWallet?: IUserWallet)
     {
-        super();
+        super(database, userWallet);
 
         this._interaction = interaction;
     }
 
+    private GetTargetItem() {
+        return this._interaction.options.getInteger('item');
+    }
+
     public async HandleCommand()
     {
-        const item = this._interaction.options.getInteger('item');
+        const item = this.GetTargetItem();
         this._shopItems = await this._database.GetAllShopItems();
         const userId = this._interaction.user.id;
 
@@ -27,9 +33,7 @@ export default class Shop extends BaseCommand implements ICommand{
             return;
         }
 
-        const shopItemsAsString: string[] = [];
-
-        this._shopItems.forEach((item: ShopItem) => shopItemsAsString.push(`${item.id}. ${item.name} = ${item.price}bc \n `))
+        const shopItemsAsString = Shop.CreateShopItemsString(this._shopItems);
 
         this._interaction.reply({
             content: `Welcome to the Burger Crypto Shop \n For sale we have \n ${shopItemsAsString} \n When you want to buy something do \n /shop item {insert item number}`,
@@ -42,10 +46,10 @@ export default class Shop extends BaseCommand implements ICommand{
         try {
 
             const user = await this._database.GetUser(userId);
-            const userWallet = await this._database.GetUserWallet(userId);
+            const userWallet = await this._userWallet.Get(userId);
             const shopItem = this.GetItemFromAllShopItems(item);
 
-            if (!(await this.UserCanBuyItem(shopItem, user, userWallet))){
+            if (!this.UserCanBuyItem(shopItem, user, userWallet)) {
                 return;
             }
 
@@ -67,12 +71,10 @@ export default class Shop extends BaseCommand implements ICommand{
         }
     }
 
-    private async UserCanBuyItem(item: ShopItem, user: any, userWallet: any): Promise<boolean>{
-        const userCooldown = await this._database.GetUserCooldown(user.id);
-
-        if (IsUserOnCooldown(userCooldown)) {
+    private UserCanBuyItem(item: ShopItem, user: any, userWallet: any): boolean{
+        if (IsUserOnCooldown(user.coolDown)) {
             this._interaction.reply({
-                content: `You can't currently buy this. You are on a cooldown for ${TimeDifferenceInMinutes(userCooldown)}`,
+                content: `You can't currently buy this. You are on a cooldown for ${TimeDifferenceInMinutes(user.coolDown)}`,
                 ephemeral: true
             });
             return false;
@@ -97,6 +99,15 @@ export default class Shop extends BaseCommand implements ICommand{
         }
 
         return item;
+    }
+
+    public static CreateShopItemsString(shopItems: ShopItem[])
+    {
+        const shopItemsAsString: string[] = [];
+
+        shopItems.forEach((item: ShopItem) => shopItemsAsString.push(`${item.id}. ${item.name} = ${item.price}bc \n `));
+
+        return shopItemsAsString;
     }
 }
 

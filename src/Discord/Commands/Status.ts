@@ -18,7 +18,7 @@ export default class Status extends BaseCommand implements ICommand{
     {
         const userId = this._interaction.user.id;
         const user = await this._database.GetUser(userId);
-        const userWallet = await this._database.GetUserWallet(userId);
+        const userWallet = await this._userWallet.Get(userId);
 
         console.log(user.coolDown);
 
