@@ -48,15 +48,22 @@ export default class Gamble extends BaseCommand implements ICommand{
             return;
         }
 
+        if (await this._userWallet.WagerIsOverMaxUserBet(userPlaying, wager)) {
+            this._interaction.reply({
+                content: `You cannot bet this much. The max you can bet is ${await this._userWallet.GetMaxAllowedBet(userPlaying)} bc`,
+                ephemeral: true,
+            });
+
+            return;
+        }
+
         // TODO max user bet
 
         const landedOnRandom = this.GetWhoToLandOnRandomOrYourself();
 
         if (landedOnRandom) {
-            const allUserIds = (await this._database.GetAllUserIds()).filter((userId: string) => userId !== selectedUserId);
-
-            console.log("allUserIds")
-            console.log(allUserIds);
+            // Get all users from highscores as that'll be the most complete
+            const allUserIds = (await this._database.GetAllHighscores()).filter((user: any) => user.id !== userPlaying);
 
             if (allUserIds.length === 0){
                 this._interaction.reply(`Not enough users have interacted with the burger bot to play roulette yet.`);
@@ -64,7 +71,7 @@ export default class Gamble extends BaseCommand implements ICommand{
             }
 
             const randomPosition = Math.floor(Math.random() * allUserIds.length);
-            selectedUserId = allUserIds[randomPosition];
+            selectedUserId = allUserIds[randomPosition].id;
         }
 
         if (selectedUserId !== userPlaying){
@@ -80,7 +87,6 @@ export default class Gamble extends BaseCommand implements ICommand{
 
     private GetWhoToLandOnRandomOrYourself(): Boolean {
         const value = getRandomInt(0, 1000000);
-        console.log(value);
         // if the number is even, its landed on a random person
         return value % 2 === 0;
     }

@@ -14,5 +14,4 @@ export default interface IDatabase {
     GetAllShopItems(): Promise<any>;
     GetUserShieldPenetratorStatus(userId: string): Promise<boolean>;
     SetUserShieldPenetratorStatus(userId: string, shieldPenetratorEnabled: boolean): Promise<void>;
-    GetAllUserIds(): Promise<any>;
 }

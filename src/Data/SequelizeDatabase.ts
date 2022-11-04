@@ -155,10 +155,6 @@ export default class SequelizeDatabase implements IDatabase
         await this._users.update( { hasShieldPenetrator }, {where: { id: userId }});
     }
 
-    public async GetAllUserIds(): Promise<any>{
-        return await this._highScores.findAll({ attributes: ['id'] });
-    }
-
     private async GetUserHighScore(userId: string)
     {
         return await this._highScores.findOne( { where: { id: userId } } );

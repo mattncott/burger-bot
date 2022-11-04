@@ -20,8 +20,6 @@ export default class Status extends BaseCommand implements ICommand{
         const user = await this._database.GetUser(userId);
         const userWallet = await this._userWallet.Get(userId);
 
-        console.log(user.coolDown);
-
         this._interaction.reply({
             content: `Shield Status: ${user.hasShield ? "Enabled" : "Disabled"} \n`
                 +`Cooldown status: ${!IsUserOnCooldown(user.coolDown) ? "None" : `${TimeDifferenceInMinutes(user.coolDown)} minutes`}\n`

@@ -82,5 +82,19 @@ describe('UserWallet tests', () => {
     expect(result).toBeTruthy();
   });
 
+  test('When the user applies a bet that is over their allowed limit, returns false', async () => {
+    const userId = "1";
+    const result = await userWallet.WagerIsOverMaxUserBet(userId, 11);
+
+    expect(result).toBeTruthy();
+  });
+
+  test('When the user applies a bet that is under their allowed limit, returns false', async () => {
+    const userId = "1";
+    const result = await userWallet.WagerIsOverMaxUserBet(userId, 1);
+
+    expect(result).toBeFalsy();
+  });
+
 
 });

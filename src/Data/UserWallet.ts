@@ -5,6 +5,7 @@ export class UserWallet implements IUserWallet {
 
     private readonly _database: IDatabase;
     private readonly _baseWalletIncrease = 1;
+    private readonly _maxAllowedBet = 10;
 
     constructor(database: IDatabase)
     {
@@ -40,6 +41,19 @@ export class UserWallet implements IUserWallet {
     public async IncreaseUserWalletByAmount(userId: string, increaseByAmount: number): Promise<void>{
         const userWallet = await this._database.GetUserWallet(userId);
         await this.UpdateWalletAmount(userId, userWallet.amountInWallet + increaseByAmount);
+    }
+
+    public async WagerIsOverMaxUserBet(userPlaying: string, wager: number): Promise<boolean>{
+        const maxUserAllowedBet = await this.GetMaxAllowedBet(userPlaying);
+        // TODO Does the user have any wallet multipliers??? If so increase this value
+        return maxUserAllowedBet < wager;
+    }
+
+    // TODO unit test this method
+    public async GetMaxAllowedBet(userPlaying: string): Promise<number>{
+        const maxUserAllowedBet = this._maxAllowedBet;
+        // TODO Does the user have any wallet multipliers??? If so increase this value
+        return maxUserAllowedBet;
     }
 
     private async UpdateWalletAmount(userId: string, amount: number): Promise<void>{

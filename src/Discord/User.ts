@@ -17,8 +17,6 @@ export default class User extends BaseCommand {
         const userId = this._interaction.user.id;
         const user = await this._database.GetUser(userId);
 
-        console.log(user?.id);
-
         if (user === null){
             await this._database.CreateUser(userId);
         }
