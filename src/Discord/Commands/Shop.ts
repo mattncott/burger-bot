@@ -53,7 +53,7 @@ export default class Shop extends BaseCommand implements ICommand{
                 await this._database.SetUserShield(user.id, true);
             }
 
-            await this._database.UpdateUserWallet(user.id, userWallet.amountInWallet - shopItem.price);
+            await this._userWallet.DecreaseUserWallet(user.id, shopItem.price);
 
             this._interaction.reply({
                 content: `Congrats, you bought a ${shopItem.name}. It's been applied to your person!`,

@@ -1,0 +1,60 @@
+import { UserWallet } from "../../src/Data/UserWallet";
+import IDatabase from "../../src/Data/Interfaces/IDatabase";
+import { UserWalletType } from "../../src/Types/UserWallet";
+import { mock } from 'jest-mock-extended';
+
+describe('UserWallet tests', () => {
+
+  const databaseMock = mock<IDatabase>();
+  const userWallet = new UserWallet(databaseMock);
+
+  test('Decreasing the user wallet by an amount greater than the users wallet fails', async () => {
+    const userId = "1";
+    databaseMock.GetUserWallet.mockReturnValue(Promise.resolve({
+        id: "1",
+        amountInWallet: 0,
+        userId: userId,
+    } as UserWalletType));
+
+    await expect(userWallet.DecreaseUserWallet(userId, 10)).rejects.toThrow("Cannot Purchase, not enough money in wallet.");
+  });
+
+  test('Decreasing the user wallet when the user has enough money resolves', async () => {
+    const userId = "1";
+    databaseMock.GetUserWallet.mockReturnValue(Promise.resolve({
+        id: "1",
+        amountInWallet: 10,
+        userId: userId,
+    } as UserWalletType));
+
+    await expect(userWallet.DecreaseUserWallet(userId, 10)).resolves;
+  });
+
+  test('Decreasing the user wallet when the user has enough calls database', async () => {
+    const userId = "1";
+    databaseMock.GetUserWallet.mockReturnValue(Promise.resolve({
+        id: "1",
+        amountInWallet: 10,
+        userId: userId,
+    } as UserWalletType));
+
+    await userWallet.DecreaseUserWallet(userId, 10);
+
+    expect(databaseMock.UpdateUserWallet).toHaveBeenCalledWith(userId, 0);
+  });
+
+  test('Increasing the user wallet when a user burgers with no enhancement calls database with right value', async () => {
+    const userId = "1";
+    databaseMock.GetUserWallet.mockReturnValue(Promise.resolve({
+        id: "1",
+        amountInWallet: 10,
+        userId: userId,
+    } as UserWalletType));
+
+    await userWallet.IncreaseUserWallet(userId);
+
+    expect(databaseMock.UpdateUserWallet).toHaveBeenCalledWith(userId, 11);
+  });
+
+
+});

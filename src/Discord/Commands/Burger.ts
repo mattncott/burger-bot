@@ -7,7 +7,6 @@ export default class Burger extends BaseCommand implements ICommand {
 
     private _interaction: ChatInputCommandInteraction;
 
-    private readonly _successfulBurgerPrice = 1;
 
     constructor(interaction: ChatInputCommandInteraction)
     {
@@ -48,12 +47,10 @@ export default class Burger extends BaseCommand implements ICommand {
             return;
         }
         
-        const userWallet = await this._database.GetUserWallet(sendingUser.id);
-
         await this._database.SetHighscores(targetUser.id, true);
         await this._database.SetHighscores(sendingUser.id, false);
         await this._database.SetUserCooldown(sendingUser.id);
-        await this._database.UpdateUserWallet(sendingUser.id, userWallet.amountInWallet + this._successfulBurgerPrice)
+        await this._userWallet.IncreaseUserWallet(sendingUser.id);
         
         await this._interaction.reply(`${userMention(sendingUser.id)} just burgered ${userMention(targetUser.id)}`);
     }
