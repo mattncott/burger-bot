@@ -13,6 +13,7 @@ export default class SequelizeDatabase implements IDatabase
     private _wallets;
     private _users;
     private _shopItems;
+    private _guilds;
 
     constructor()
     {
@@ -24,6 +25,7 @@ export default class SequelizeDatabase implements IDatabase
             id: { type: sequelize.STRING, unique: true, primaryKey: true },
             numberOfBurgers: { type: sequelize.INTEGER, defaultValue: 0 },
             numberOfTimesBurgered: { type: sequelize.INTEGER, defaultValue: 0 },
+            guildId: { type: sequelize.STRING, allowNull: false },
         });
 
         this._wallets = this._database.define('wallets',
@@ -46,17 +48,21 @@ export default class SequelizeDatabase implements IDatabase
             price: { type: sequelize.INTEGER, allowNull: false },
             description: { type: sequelize.STRING, allowNull: true }
         })
+
+        this._guilds = this._database.define('guilds', {
+            id: { type: sequelize.STRING, unique: true, primaryKey: true },
+        })
     }
 
-    public async GetAllHighscores(): Promise<any>
+    public async GetAllHighscores(guildId: string): Promise<any>
     {
         await this._highScores.sync({ alter: true });
-        return await this._highScores.findAll();
+        return await this._highScores.findAll({ where: { guildId } });
     }
 
-    public async SetHighscores(userId: string, incrementNumberOfTimesBurgered: boolean): Promise<void>
+    public async SetHighscores(userId: string, incrementNumberOfTimesBurgered: boolean, guildId: string): Promise<void>
     {
-        const userHighScore = await this.GetUserHighScore(userId);
+        const userHighScore = await this.GetUserHighScore(userId, guildId);
 
         if (userHighScore)
         {
@@ -66,7 +72,8 @@ export default class SequelizeDatabase implements IDatabase
 
         this._highScores.create(
             {
-                id: userId
+                id: userId,
+                guildId
             });
 
     }
@@ -127,10 +134,11 @@ export default class SequelizeDatabase implements IDatabase
     }
 
     public async ValidateDatabase(){
-        await this._highScores.sync({ alter: true });
+        await this._highScores.sync({ force: true });
         await this._users.sync({ alter: true });
         await this._wallets.sync({ alter: true });
         await this._shopItems.sync({ force: true });
+        await this._guilds.sync({ alter: true });
     }
 
     public async GetAllShopItems(): Promise<any> {
@@ -155,9 +163,23 @@ export default class SequelizeDatabase implements IDatabase
         await this._users.update( { hasShieldPenetrator }, {where: { id: userId }});
     }
 
-    private async GetUserHighScore(userId: string)
+    public async GetAllGuilds(): Promise<any> {
+        return await this._guilds.findAll();
+    }
+
+    public async AddGuild(guildId: string): Promise<void> {
+        const guildExists = await this._guilds.findByPk(guildId);
+
+        if (!guildExists){
+            await this._guilds.create({
+                id: guildId
+            });
+        }
+    }
+
+    private async GetUserHighScore(userId: string, guildId: string)
     {
-        return await this._highScores.findOne( { where: { id: userId } } );
+        return await this._highScores.findOne( { where: { id: userId, guildId } } );
     }
 
     private SetupDatabase(){

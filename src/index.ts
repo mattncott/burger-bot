@@ -1,19 +1,16 @@
 import SequelizeDatabase from "./Data/SequelizeDatabase";
-import { StartBot } from "./Discord/Bot";
-import { RegisterCommands } from "./Discord/CommandRegister";
-import { EnvironmentMode, IsDevelopmentEnv, DiscordToken, guildId, clientId, DatabaseType } from "./Environment";
+import DiscordBot from "./Discord/Bot";
+import { EnvironmentMode, IsDevelopmentEnv, DiscordToken, ClientId, DatabaseType } from "./Environment";
 import { isNull } from "./Helper";
 import { DatabaseTypeEnum } from "./Types/DatabaseType";
 import { ShopItems } from "./Types/ShopItems";
 
 ValidateEnvironmentVariables();
 Run();
-
 async function Run(){
     SetupDevelopmentEnvironment();
     await ValidateDatabase();
     StartBot();
-    RegisterCommands();
     // TODO Add image listener back
     // ListenForImages();
 }
@@ -34,17 +31,21 @@ function ValidateEnvironmentVariables(): void {
         throw new Error("token is not defined");
     }
     
-    if (isNull(guildId)) {
-        throw new Error("guildid is not defined");
-    }
-    
-    if (isNull(clientId)) {
+    if (isNull(ClientId)) {
         throw new Error("clientid is not defined");
     }
 
     if (!allowedDatabaseTypes.includes(DatabaseType as DatabaseTypeEnum)){
         throw new Error("Non supported database type");
     }
+}
+
+function StartBot() {
+    (async () => {
+        const bot = new DiscordBot();
+        bot.RegisterCommands();
+        bot.Start();
+    })();
 }
 
 async function ValidateDatabase() {

@@ -10,6 +10,7 @@ export default class Gamble extends BaseCommand implements ICommand{
 
     private _interaction: ChatInputCommandInteraction;
     private _burgerClass: Burger;
+    private _guildId: string | null;
 
     constructor(interaction: ChatInputCommandInteraction, database?: IDatabase, userWallet?: IUserWallet)
     {
@@ -17,6 +18,7 @@ export default class Gamble extends BaseCommand implements ICommand{
 
         this._burgerClass = new Burger(interaction, database, userWallet);
         this._interaction = interaction;
+        this._guildId = interaction.guildId;
     }
 
     private GetTargetWager()
@@ -30,6 +32,11 @@ export default class Gamble extends BaseCommand implements ICommand{
         const wager = this.GetTargetWager();
         const userPlaying = this._interaction.user.id;
         let selectedUserId = this._interaction.user.id;
+
+        if (this._guildId === null) {
+            this._interaction.reply("This command is only allowed from within a server.");
+            return;
+        }
 
         if (0 >= wager) {
             this._interaction.reply({
@@ -57,13 +64,11 @@ export default class Gamble extends BaseCommand implements ICommand{
             return;
         }
 
-        // TODO max user bet
-
         const landedOnRandom = this.GetWhoToLandOnRandomOrYourself();
 
         if (landedOnRandom) {
             // Get all users from highscores as that'll be the most complete
-            const allUserIds = (await this._database.GetAllHighscores()).filter((user: any) => user.id !== userPlaying);
+            const allUserIds = (await this._database.GetAllHighscores(this._guildId)).filter((user: any) => user.id !== userPlaying);
 
             if (allUserIds.length === 0){
                 this._interaction.reply(`Not enough users have interacted with the burger bot to play roulette yet.`);
@@ -75,7 +80,7 @@ export default class Gamble extends BaseCommand implements ICommand{
         }
 
         if (selectedUserId !== userPlaying){
-            await this._burgerClass.SetSuccessBurgerDatabaseValues(userPlaying, selectedUserId, false);
+            await this._burgerClass.SetSuccessBurgerDatabaseValues(selectedUserId, userPlaying, false);
             await this._userWallet.IncreaseUserWalletByAmount(userPlaying, wager);
             this._interaction.reply(`${userMention(userPlaying)} played roulette and just burgered ${userMention(selectedUserId)} and won ${wager} bc`);
         } else {

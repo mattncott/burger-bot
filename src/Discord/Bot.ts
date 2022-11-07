@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { DiscordToken } from "../Environment";
-import { LogError } from "../Logger";
+import { DiscordToken, ClientId } from "../Environment";
+import { LogError, StartUpLog } from "../Logger";
 import Balance from "./Commands/Balance";
 import Burger from "./Commands/Burger";
 import HighScore from "./Commands/Highscore";
@@ -8,9 +8,24 @@ import Gamble from "./Commands/Gamble";
 import Shop from "./Commands/Shop";
 import Status from "./Commands/Status";
 import User from "./User";
+import Cron from "../Cron";
+import DiscordHandler from "./DiscordHandler";
+import IDatabase from "../Data/Interfaces/IDatabase";
+import SequelizeDatabase from "../Data/SequelizeDatabase";
+import { SlashCommandBuilder, Routes } from 'discord.js';
+import { REST }  from '@discordjs/rest';
+import { LogInfo } from '../Logger';
 
-export function StartBot() {
-    (async () => {
+export default class DiscordBot {
+
+    private readonly _database: IDatabase;
+
+    constructor(database?: IDatabase) {
+        this._database = database === null || database === undefined ? new SequelizeDatabase() : database;
+    }
+
+    public async Start()
+    {
         var client = null as unknown as Client;
         try {
             // Create a new client instance
@@ -18,7 +33,18 @@ export function StartBot() {
 
             // When the client is ready, run this code (only once)
             client.once('ready', () => {
-                console.log('Bot is online!');
+                StartUpLog('Bot is online!');
+
+                // start cron
+                const cron = new Cron(client);
+                cron.Run();
+            });
+
+            client.on('guildCreate', async (guild) => {
+                const discordHandler = new DiscordHandler(client);
+                discordHandler.SetupDiscordServer(guild);
+                await this._database.AddGuild(guild.id);
+                await this.RegisterCommands();
             });
 
             client.on('interactionCreate', async interaction => {
@@ -32,15 +58,6 @@ export function StartBot() {
                     userClass.AddUser();
                 
                     switch (commandName) {
-                        case 'ping':
-                            await interaction.reply('Pong!');
-                            break;
-                        case 'server':
-                            await interaction.reply(`Server name: ${interaction.guild?.name}\nTotal members: ${interaction.guild?.memberCount}`);
-                            break;
-                        case 'user':
-                            await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
-                            break;
                         case 'burger':
                             const burgerClass = new Burger(interaction);
                             await burgerClass.HandleCommand();
@@ -76,5 +93,55 @@ export function StartBot() {
         } catch (error) {
             LogError(error);
         }
-    })();
+    }
+
+    public async RegisterCommands()
+    {
+        StartUpLog("Registering discord commands");
+        const commands = [
+            new SlashCommandBuilder()
+                .setName('burger')
+                .setDescription('Burger Someone')
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('user').setDescription('The person to burger')
+                        .addUserOption(option => option.setName('target').setDescription('The user'))),
+            new SlashCommandBuilder()
+                .setName('highscore')
+                .setDescription('Burger Highscores'),
+            new SlashCommandBuilder()
+                .setName('balance')
+                .setDescription('See your balance in crypto burger coins'),
+            new SlashCommandBuilder()
+                .setName('shop')
+                .setDescription('See what you can buy in the shop.')
+                .addIntegerOption(option =>
+                    option
+                        .setName('item')
+                        .setDescription('What you would like to buy')),
+            new SlashCommandBuilder()
+                .setName('status')
+                .setDescription('See your current status'),
+            new SlashCommandBuilder()
+                .setName('gamble')
+                .setDescription('Wager a bet? Will you burger yourself or someone random?')
+                .addIntegerOption(option => option.setRequired(true).setName('wager').setDescription('How much are you betting?'))
+        ];
+    
+        var commandsAsJson = commands.map(command => command.toJSON());
+        
+        const rest = new REST({ version: '10' }).setToken(DiscordToken);
+        
+        const guilds = await this._database.GetAllGuilds();
+
+        if (guilds.length === 0) {
+            LogError("Cannot register any commands. No GuildIds are present");
+        }
+
+        guilds.forEach((guild: any) => {
+            rest.put(Routes.applicationGuildCommands(ClientId, guild.id), { body: commandsAsJson })
+            .then(() => LogInfo('Successfully registered application commands.'))
+            .catch(console.error);
+        })
+    }
 }

@@ -8,12 +8,14 @@ import ICommand from "./interfaces/ICommand";
 export default class Burger extends BaseCommand implements ICommand {
 
     private _interaction: ChatInputCommandInteraction;
+    private readonly _guildId: string | null;
 
     constructor(interaction: ChatInputCommandInteraction, database?: IDatabase, userWallet?: IUserWallet)
     {
         super(database, userWallet);
 
         this._interaction = interaction;
+        this._guildId = interaction.guildId;
     }
 
     private GetTargetUser()
@@ -23,6 +25,12 @@ export default class Burger extends BaseCommand implements ICommand {
 
     public async HandleCommand()
     {
+
+        if (this._guildId === null){
+            this._interaction.reply("This command is only allowed from within a server.");
+            return;
+        }
+
         let targetUser = this.GetTargetUser();
 
         const sendingUser = this._interaction.user;
@@ -86,8 +94,8 @@ export default class Burger extends BaseCommand implements ICommand {
     }
 
     public async SetSuccessBurgerDatabaseValues(targetUserId: string, sendingUserId: string, increaseUserWallet = true): Promise<void>{
-        await this._database.SetHighscores(targetUserId, true);
-        await this._database.SetHighscores(sendingUserId, false);
+        await this._database.SetHighscores(targetUserId, true, this.GetGuildId());
+        await this._database.SetHighscores(sendingUserId, false, this.GetGuildId());
         await this._database.SetUserCooldown(sendingUserId);
 
         if (increaseUserWallet){
@@ -96,7 +104,16 @@ export default class Burger extends BaseCommand implements ICommand {
     }
 
     public async SetUserFailedBurgerDatabaseValues(sendingUserId: string): Promise<void>{
-        await this._database.SetHighscores(sendingUserId, true);
+        await this._database.SetHighscores(sendingUserId, true, this.GetGuildId());
         await this._database.SetUserCooldown(sendingUserId);
+    }
+
+    private GetGuildId(): string {
+        if (this._guildId === null) {
+            // this condition shouldn't evaluate. It will never get this far.
+            throw new Error("Guild Id is null");
+        }
+
+        return this._guildId;
     }
 }

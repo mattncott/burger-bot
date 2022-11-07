@@ -1,7 +1,7 @@
 export default interface IDatabase {
     ValidateDatabase(): Promise<void>;
-    GetAllHighscores(): Promise<any>; // TODO replace with HighScoreType[]
-    SetHighscores(userID: string, incrementNumberOfTimesBurgered: boolean): Promise<void>;
+    GetAllHighscores(guildId: string): Promise<any>; // TODO replace with HighScoreType[]
+    SetHighscores(userID: string, incrementNumberOfTimesBurgered: boolean, guildId: string): Promise<void>;
     GetUserWallet(userId: string): Promise<any>; // TODO replace with UserWallet
     SetUserCooldown(userId: string): Promise<void>;
     GetUserCooldown(userId: string): Promise<Date>;
@@ -14,4 +14,6 @@ export default interface IDatabase {
     GetAllShopItems(): Promise<any>;
     GetUserShieldPenetratorStatus(userId: string): Promise<boolean>;
     SetUserShieldPenetratorStatus(userId: string, shieldPenetratorEnabled: boolean): Promise<void>;
+    GetAllGuilds(): Promise<any>
+    AddGuild(guildId: string): Promise<void>
 }
