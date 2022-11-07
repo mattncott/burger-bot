@@ -18,4 +18,10 @@ async function script_071120221626(database: IDatabase){
         }
 
     }
+
+    const allGuids = await database.GetAllGuilds();
+    if (allGuids.length === 0)
+    {
+        await database.AddGuild("544533251742629918");
+    }
 }
