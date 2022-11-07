@@ -4,14 +4,17 @@ import Gamble from "../../../src/Discord/Commands/Gamble";
 import { HighScoreType } from "../../../src/Types/HighScoreType";
 
 import { mock } from 'jest-mock-extended';
-import { ChatInputCommandInteraction, CommandInteractionOptionResolver, User } from "discord.js";
+import { ChatInputCommandInteraction, Client, CommandInteractionOptionResolver, Role, User } from "discord.js";
+import BaseDiscordCommand from "../../../src/Discord/Commands/BaseDiscordCommand";
 
 describe('Burger Command tests', () => {
 
   let mockDatabase = mock<IDatabase>();
   let mockUserWallet = mock<IUserWallet>();
   let mockInteraction = mock<ChatInputCommandInteraction>();
-  let rouletteClass = new Gamble(mockInteraction, mockDatabase, mockUserWallet);
+  let mockDiscordClient = mock<Client>();
+
+  let gambleClass = new Gamble(mockInteraction, mockDiscordClient, mockDatabase, mockUserWallet);
 
   const mockUser = mock<User>();
 
@@ -26,10 +29,28 @@ describe('Burger Command tests', () => {
 
     mockUserWallet.CheckTheresEnoughMoneyInWallet.mockReturnValue(Promise.resolve(true));
     mockDatabase.GetAllHighscores.mockReturnValue(Promise.resolve(userHighscores));
-    rouletteClass = new Gamble(mockInteraction, mockDatabase, mockUserWallet);
+    gambleClass = new Gamble(mockInteraction, mockDiscordClient, mockDatabase, mockUserWallet);
+
+    const handleGetOrCreateRole = jest.spyOn(BaseDiscordCommand.prototype as any, 'GetOrCreateRole');
+    handleGetOrCreateRole.mockImplementation(() => mock<Role>());
+
+    const handleAddUserToRole = jest.spyOn(BaseDiscordCommand.prototype as any, 'AddUserToRole');
+    handleAddUserToRole.mockImplementation(() => null);
 
     const handleGetTargetWager = jest.spyOn(Gamble.prototype as any, 'GetTargetWager');
     handleGetTargetWager.mockImplementation(() => 10);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('Blank guild id throws the correct error', async () => {
+    jest.spyOn(Gamble.prototype as any, 'GetGuildId').mockImplementation(() => null);
+
+    await gambleClass.HandleCommand();
+    expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
+    expect(mockInteraction.reply).toHaveBeenCalledWith("This command is only allowed from within a server.");
   });
 
   test('When someone plays roulette and hits themself, the correct reply appears', async () => {
@@ -37,8 +58,7 @@ describe('Burger Command tests', () => {
     const handleGetWhoToLandOnRandomOrYourself = jest.spyOn(Gamble.prototype as any, 'GetWhoToLandOnRandomOrYourself');
     handleGetWhoToLandOnRandomOrYourself.mockImplementation(() => false);
 
-
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
     expect(mockInteraction.reply).toHaveBeenCalledWith(`<@1> played roulette and just burgered themselves and lost 10 bc`);
   });
@@ -48,7 +68,7 @@ describe('Burger Command tests', () => {
     const handleGetWhoToLandOnRandomOrYourself = jest.spyOn(Gamble.prototype as any, 'GetWhoToLandOnRandomOrYourself');
     handleGetWhoToLandOnRandomOrYourself.mockImplementation(() => true);
 
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
     expect(mockInteraction.reply).toHaveBeenCalledWith(`<@1> played roulette and just burgered <@2> and won 10 bc`);
   });
@@ -63,7 +83,7 @@ describe('Burger Command tests', () => {
     ];
     mockDatabase.GetAllHighscores.mockReturnValue(Promise.resolve(userHighscores));
 
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
     expect(mockInteraction.reply).toHaveBeenCalledWith(`Not enough users have interacted with the burger bot to play roulette yet.`);
   });
@@ -76,7 +96,7 @@ describe('Burger Command tests', () => {
     const handleGetTargetWager = jest.spyOn(Gamble.prototype as any, 'GetTargetWager');
     handleGetTargetWager.mockImplementation(() => 0);
 
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
     expect(mockInteraction.reply).toHaveBeenCalledWith({
         content: `You must wager more than 0 bc to play this game`,
@@ -91,7 +111,7 @@ describe('Burger Command tests', () => {
 
     mockUserWallet.CheckTheresEnoughMoneyInWallet.mockReturnValue(Promise.resolve(false));
 
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
     expect(mockInteraction.reply).toHaveBeenCalledWith({
         content: `You do not have enough money to bet this much. Check your balance with /balance`,
@@ -104,8 +124,9 @@ describe('Burger Command tests', () => {
     const handleGetWhoToLandOnRandomOrYourself = jest.spyOn(Gamble.prototype as any, 'GetWhoToLandOnRandomOrYourself');
     handleGetWhoToLandOnRandomOrYourself.mockImplementation(() => true);
 
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockDatabase.SetHighscores).toHaveBeenCalledTimes(2);
+    expect(mockDatabase.SetBurgered).toHaveBeenCalledTimes(1);
     expect(mockDatabase.SetUserCooldown).toHaveBeenCalledTimes(1);
     expect(mockUserWallet.IncreaseUserWalletByAmount).toHaveBeenCalledTimes(1);
   });
@@ -115,7 +136,7 @@ describe('Burger Command tests', () => {
     const handleGetWhoToLandOnRandomOrYourself = jest.spyOn(Gamble.prototype as any, 'GetWhoToLandOnRandomOrYourself');
     handleGetWhoToLandOnRandomOrYourself.mockImplementation(() => false);
 
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockDatabase.SetHighscores).toHaveBeenCalledTimes(1);
     expect(mockDatabase.SetUserCooldown).toHaveBeenCalledTimes(1);
     expect(mockUserWallet.DecreaseUserWallet).toHaveBeenCalledTimes(1);
@@ -129,7 +150,7 @@ describe('Burger Command tests', () => {
     mockUserWallet.WagerIsOverMaxUserBet.mockReturnValue(Promise.resolve(true));
     mockUserWallet.GetMaxAllowedBet.mockReturnValue(Promise.resolve(10));
 
-    await rouletteClass.HandleCommand();
+    await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
     expect(mockInteraction.reply).toHaveBeenCalledWith({
         content: `You cannot bet this much. The max you can bet is 10 bc`,

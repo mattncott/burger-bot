@@ -1,4 +1,5 @@
 import SequelizeDatabase from "./Data/SequelizeDatabase";
+import UpgradeDatabaseData from "./Data/UpgradeScripts";
 import DiscordBot from "./Discord/Bot";
 import { EnvironmentMode, IsDevelopmentEnv, DiscordToken, ClientId, DatabaseType } from "./Environment";
 import { isNull } from "./Helper";
@@ -51,6 +52,7 @@ function StartBot() {
 async function ValidateDatabase() {
     const database = new SequelizeDatabase();
     await database.ValidateDatabase();
+    await UpgradeDatabaseData(database);
     console.log('Database validated');
 
     // Setup the shop

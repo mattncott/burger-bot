@@ -1,18 +1,19 @@
-import { ChatInputCommandInteraction, User, userMention } from "discord.js";
+import { ChatInputCommandInteraction, Client, Guild, User, userMention } from "discord.js";
 import IDatabase from "../../Data/Interfaces/IDatabase";
 import IUserWallet from "../../Data/Interfaces/IUserWallet";
 import { IsUserOnCooldown, TimeDifferenceInMinutes } from "../../Helper";
-import BaseCommand from "./BaseCommand";
+import { Roles } from "../../Types/Roles";
+import BaseDiscordCommand from "./BaseDiscordCommand";
 import ICommand from "./interfaces/ICommand";
 
-export default class Burger extends BaseCommand implements ICommand {
+export default class Burger extends BaseDiscordCommand implements ICommand {
 
-    private _interaction: ChatInputCommandInteraction;
+    private readonly _interaction: ChatInputCommandInteraction;
     private readonly _guildId: string | null;
 
-    constructor(interaction: ChatInputCommandInteraction, database?: IDatabase, userWallet?: IUserWallet)
+    constructor(interaction: ChatInputCommandInteraction, discordClient: Client, database?: IDatabase, userWallet?: IUserWallet)
     {
-        super(database, userWallet);
+        super(discordClient, database, userWallet);
 
         this._interaction = interaction;
         this._guildId = interaction.guildId;
@@ -32,6 +33,7 @@ export default class Burger extends BaseCommand implements ICommand {
         }
 
         let targetUser = this.GetTargetUser();
+        
 
         const sendingUser = this._interaction.user;
 
@@ -39,9 +41,11 @@ export default class Burger extends BaseCommand implements ICommand {
             targetUser = sendingUser;
         }
 
+        await this._database.GetUser(targetUser.id);
+
         const user = await this._database.GetUser(sendingUser.id);
 
-        if (IsUserOnCooldown(user.coolDown)) {
+        if (IsUserOnCooldown(user?.coolDown)) {
             this._interaction.reply({
                 content: `You can't send a Burger right now. You're on a cooldown for ${TimeDifferenceInMinutes(user.coolDown)} minutes`,
                 ephemeral: true
@@ -94,6 +98,9 @@ export default class Burger extends BaseCommand implements ICommand {
     }
 
     public async SetSuccessBurgerDatabaseValues(targetUserId: string, sendingUserId: string, increaseUserWallet = true): Promise<void>{
+        await this.UpdateUserBurgeredRole(targetUserId);
+
+        await this._database.SetBurgered(targetUserId, true);
         await this._database.SetHighscores(targetUserId, true, this.GetGuildId());
         await this._database.SetHighscores(sendingUserId, false, this.GetGuildId());
         await this._database.SetUserCooldown(sendingUserId);
@@ -105,7 +112,24 @@ export default class Burger extends BaseCommand implements ICommand {
 
     public async SetUserFailedBurgerDatabaseValues(sendingUserId: string): Promise<void>{
         await this._database.SetHighscores(sendingUserId, true, this.GetGuildId());
+        await this._database.SetBurgered(sendingUserId, true);
         await this._database.SetUserCooldown(sendingUserId);
+        await this.UpdateUserBurgeredRole(sendingUserId);
+    }
+
+    private async UpdateUserBurgeredRole(userId: string): Promise<void>
+    {
+        const role = await this.GetOrCreateRole(Roles.Burgered, {}, this.GetGuild());
+        await this.AddUserToRole(this.GetGuild(), role, userId);
+    }
+
+    private GetGuild(): Guild {
+        if (this._interaction.guild === null) {
+            // this condition shouldn't evaluate. It will never get this far
+            throw new Error("Guild is null");
+        }
+
+        return this._interaction.guild;
     }
 
     private GetGuildId(): string {

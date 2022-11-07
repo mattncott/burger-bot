@@ -55,11 +55,11 @@ export default class DiscordBot {
 
                     // When a user sends a command, add them to the system.
                     const userClass = new User(interaction);
-                    userClass.AddUser();
+                    await userClass.AddUser();
                 
                     switch (commandName) {
                         case 'burger':
-                            const burgerClass = new Burger(interaction);
+                            const burgerClass = new Burger(interaction, client);
                             await burgerClass.HandleCommand();
                             break;
                         case 'highscore':
@@ -79,7 +79,7 @@ export default class DiscordBot {
                             await statusClass.HandleCommand();
                             break;
                         case 'gamble':
-                            const rouletteClass = new Gamble(interaction);
+                            const rouletteClass = new Gamble(interaction, client);
                             await rouletteClass.HandleCommand();
                             break;
                     }

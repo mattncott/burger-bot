@@ -22,6 +22,7 @@ export default class Status extends BaseCommand implements ICommand{
 
         this._interaction.reply({
             content: `Shield Status: ${user.hasShield ? "Enabled" : "Disabled"} \n`
+                + `Shield Penetrator Status: ${user.hasShieldPenetrator ? "Enabled" : "Disabled"} \n`
                 +`Cooldown status: ${!IsUserOnCooldown(user.coolDown) ? "None" : `${TimeDifferenceInMinutes(user.coolDown)} minutes`}\n`
                 +`Balance: ${userWallet.amountInWallet} bc`,
             ephemeral: true

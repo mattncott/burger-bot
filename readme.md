@@ -1,1 +1,1 @@
-invite link  = https://discord.com/api/oauth2/authorize?client_id=1012256559901978626&permissions=8&scope=applications.commands%20bot
+invite link for test bot  = https://discord.com/api/oauth2/authorize?client_id=1012256559901978626&permissions=8&scope=applications.commands%20bot

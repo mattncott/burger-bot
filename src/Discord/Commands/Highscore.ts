@@ -5,7 +5,7 @@ import ICommand from "./interfaces/ICommand";
 
 export default class HighScore extends BaseCommand implements ICommand{
 
-    private _interaction: ChatInputCommandInteraction;
+    private readonly _interaction: ChatInputCommandInteraction;
     private readonly _guildId: string | null;
 
     constructor(interaction: ChatInputCommandInteraction)

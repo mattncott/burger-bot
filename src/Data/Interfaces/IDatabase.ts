@@ -14,6 +14,9 @@ export default interface IDatabase {
     GetAllShopItems(): Promise<any>;
     GetUserShieldPenetratorStatus(userId: string): Promise<boolean>;
     SetUserShieldPenetratorStatus(userId: string, shieldPenetratorEnabled: boolean): Promise<void>;
-    GetAllGuilds(): Promise<any>
-    AddGuild(guildId: string): Promise<void>
+    GetAllGuilds(): Promise<any>;
+    AddGuild(guildId: string): Promise<void>;
+    SetBurgered(userId: string, isBurgered: boolean): Promise<void>;
+    ClearHighscores(): Promise<void>;
+    UpdateHighScoreUserId(userId: string, id: string): Promise<void>;
 }

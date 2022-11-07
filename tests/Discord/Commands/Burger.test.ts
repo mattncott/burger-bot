@@ -4,26 +4,47 @@ import Burger from "../../../src/Discord/Commands/Burger";
 import { User as UserType } from "../../../src/Types/User";
 
 import { mock } from 'jest-mock-extended';
-import { ChatInputCommandInteraction, CommandInteractionOptionResolver, User } from "discord.js";
-
-
+import { ChatInputCommandInteraction, Client, Role, User } from "discord.js";
+import BaseDiscordCommand from "../../../src/Discord/Commands/BaseDiscordCommand";
 
 describe('Burger Command tests', () => {
 
   let mockDatabase = mock<IDatabase>();
   let mockUserWallet = mock<IUserWallet>();
   let mockInteraction = mock<ChatInputCommandInteraction>();
-  let burgerClass = new Burger(mockInteraction, mockDatabase, mockUserWallet);
+  let mockDiscordClient = mock<Client>();
+
+  let burgerClass = new Burger(mockInteraction, mockDiscordClient, mockDatabase, mockUserWallet);
 
   const mockUser = mock<User>();
 
   beforeEach(() => {
     mockUser.id = "1";
     mockInteraction.user = mockUser;
+    mockInteraction.guildId = "guildId";
 
     mockDatabase.GetUserShieldStatus.mockReturnValue(Promise.resolve(false));
     mockDatabase.GetUserShieldPenetratorStatus.mockReturnValue(Promise.resolve(false));
-    burgerClass = new Burger(mockInteraction, mockDatabase, mockUserWallet);
+    burgerClass = new Burger(mockInteraction, mockDiscordClient, mockDatabase, mockUserWallet);
+
+    const handleGetOrCreateRole = jest.spyOn(BaseDiscordCommand.prototype as any, 'GetOrCreateRole');
+    handleGetOrCreateRole.mockReturnValue(mock<Role>());
+
+    const handleAddUserToRole = jest.spyOn(BaseDiscordCommand.prototype as any, 'AddUserToRole');
+    handleAddUserToRole.mockImplementation(() => null);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('Blank guild id throws the correct error', async () => {
+    mockInteraction.guildId = null;
+    const burgerClass = new Burger(mockInteraction, mockDiscordClient, mockDatabase, mockUserWallet);
+
+    await burgerClass.HandleCommand();
+    expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
+    expect(mockInteraction.reply).toHaveBeenCalledWith("This command is only allowed from within a server.");
   });
 
   test('Burger when on cooldown does not update database', async () => {
@@ -117,6 +138,7 @@ describe('Burger Command tests', () => {
     await burgerClass.HandleCommand();
 
     expect(mockDatabase.SetHighscores).toHaveBeenCalledTimes(2);
+    expect(mockDatabase.SetBurgered).toHaveBeenCalledTimes(1);
     expect(mockDatabase.SetUserCooldown).toHaveBeenCalledTimes(1);
     expect(mockUserWallet.IncreaseUserWallet).toHaveBeenCalledTimes(1);
   });

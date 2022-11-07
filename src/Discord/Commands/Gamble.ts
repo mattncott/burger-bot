@@ -1,24 +1,28 @@
-import { ChatInputCommandInteraction, userMention } from "discord.js";
+import { ChatInputCommandInteraction, Client, userMention } from "discord.js";
 import IDatabase from "../../Data/Interfaces/IDatabase";
 import IUserWallet from "../../Data/Interfaces/IUserWallet";
 import { getRandomInt } from "../../Helper";
-import BaseCommand from "./BaseCommand";
+import BaseDiscordCommand from "./BaseDiscordCommand";
 import Burger from "./Burger";
 import ICommand from "./interfaces/ICommand";
 
-export default class Gamble extends BaseCommand implements ICommand{
+export default class Gamble extends BaseDiscordCommand implements ICommand{
 
     private _interaction: ChatInputCommandInteraction;
     private _burgerClass: Burger;
-    private _guildId: string | null;
+    // private _guildId: string | null;
 
-    constructor(interaction: ChatInputCommandInteraction, database?: IDatabase, userWallet?: IUserWallet)
+    constructor(interaction: ChatInputCommandInteraction, discordClient: Client, database?: IDatabase, userWallet?: IUserWallet)
     {
-        super(database, userWallet);
+        super(discordClient, database, userWallet);
 
-        this._burgerClass = new Burger(interaction, database, userWallet);
+        this._burgerClass = new Burger(interaction, discordClient, database, userWallet);
         this._interaction = interaction;
-        this._guildId = interaction.guildId;
+    }
+
+    private GetGuildId()
+    {
+        return this._interaction.guildId;
     }
 
     private GetTargetWager()
@@ -32,8 +36,9 @@ export default class Gamble extends BaseCommand implements ICommand{
         const wager = this.GetTargetWager();
         const userPlaying = this._interaction.user.id;
         let selectedUserId = this._interaction.user.id;
+        const guildId = this.GetGuildId();
 
-        if (this._guildId === null) {
+        if (guildId === null) {
             this._interaction.reply("This command is only allowed from within a server.");
             return;
         }
@@ -68,7 +73,7 @@ export default class Gamble extends BaseCommand implements ICommand{
 
         if (landedOnRandom) {
             // Get all users from highscores as that'll be the most complete
-            const allUserIds = (await this._database.GetAllHighscores(this._guildId)).filter((user: any) => user.id !== userPlaying);
+            const allUserIds = (await this._database.GetAllHighscores(guildId)).filter((user: any) => user.id !== userPlaying);
 
             if (allUserIds.length === 0){
                 this._interaction.reply(`Not enough users have interacted with the burger bot to play roulette yet.`);

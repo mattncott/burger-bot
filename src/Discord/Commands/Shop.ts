@@ -100,6 +100,14 @@ export default class Shop extends BaseCommand implements ICommand{
             return false;
         }
 
+        if (item.id === ShopItems.Shield && user.hasShieldPenetrator){
+            this._interaction.reply({
+                content: `You can't currently buy this. You already have a shield penetrator enabled`,
+                ephemeral: true
+            });
+            return false;
+        }
+
         return true;
     }
 

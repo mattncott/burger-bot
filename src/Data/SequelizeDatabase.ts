@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 import * as sequelize from "sequelize";
 import IDatabase from "./Interfaces/IDatabase";
-import { DatabaseHost, DatabaseType, IsDevelopmentEnv } from "../Environment";
+import { DatabaseHost, DatabaseType, GuildId, IsDevelopmentEnv } from "../Environment";
 import { DatabaseTypeEnum } from "../Types/DatabaseType";
 import { User } from "../Types/User";
 
@@ -22,10 +22,11 @@ export default class SequelizeDatabase implements IDatabase
 
         this._highScores = this._database.define('highscores',
         {
-            id: { type: sequelize.STRING, unique: true, primaryKey: true },
+            id: { type: sequelize.BIGINT, unique: true, primaryKey: true },
+            userId: { type: sequelize.STRING },
             numberOfBurgers: { type: sequelize.INTEGER, defaultValue: 0 },
             numberOfTimesBurgered: { type: sequelize.INTEGER, defaultValue: 0 },
-            guildId: { type: sequelize.STRING, allowNull: false },
+            guildId: { type: sequelize.STRING, allowNull: false, defaultValue: GuildId },
         });
 
         this._wallets = this._database.define('wallets',
@@ -40,6 +41,7 @@ export default class SequelizeDatabase implements IDatabase
             coolDown: { type: sequelize.DATE },
             hasShield: { type: sequelize.BOOLEAN, defaultValue: false },
             hasShieldPenetrator: { type: sequelize.BOOLEAN, defaultValue: false },
+            burgeredStatus: { type: sequelize.DATE },
         });
 
         this._shopItems = this._database.define('shopItems', {
@@ -72,7 +74,7 @@ export default class SequelizeDatabase implements IDatabase
 
         this._highScores.create(
             {
-                id: userId,
+                userId: userId,
                 guildId
             });
 
@@ -84,14 +86,23 @@ export default class SequelizeDatabase implements IDatabase
     }
 
     public async GetUser(userId: string): Promise<any> {
-        return await this._users.findOne( { where: { id: userId } } );
+        const user = await this.FindUser(userId);
+
+        if (!user) {
+            await this.CreateUser(userId);
+        }
+
+        return await this.FindUser(userId);
     }
 
     public async SetUserCooldown(userId: string): Promise<void> {
         const date = new Date();
-        date.setMinutes(date.getMinutes() + 10);
 
-        this._users.update( { coolDown: date }, { where: { id: userId } });
+        if (!IsDevelopmentEnv) {
+            date.setMinutes(date.getMinutes() + 10);
+
+            this._users.update( { coolDown: date }, { where: { id: userId } });
+        }
     }
 
     public async GetUserCooldown(userId: string): Promise<Date> {
@@ -134,7 +145,7 @@ export default class SequelizeDatabase implements IDatabase
     }
 
     public async ValidateDatabase(){
-        await this._highScores.sync({ force: true });
+        await this._highScores.sync({ alter: true });
         await this._users.sync({ alter: true });
         await this._wallets.sync({ alter: true });
         await this._shopItems.sync({ force: true });
@@ -177,19 +188,46 @@ export default class SequelizeDatabase implements IDatabase
         }
     }
 
+    public async SetBurgered(userId: string, isBurgered: boolean): Promise<void>
+    {
+        if (isBurgered)
+        {
+            const date = new Date();
+            date.setMinutes(date.getMinutes() + 10);
+            this._users.update( { burgeredStatus: date }, { where: { id: userId } });
+        }
+        else
+        {
+            this._users.update( { burgeredStatus: null }, { where: { id: userId } });
+        }
+    }
+
+    public async ClearHighscores(): Promise<void>
+    {
+        await this._highScores.drop();
+    }
+
+    public async UpdateHighScoreUserId(userId: string, id: string): Promise<void>
+    {
+        await this._highScores.update( { userId }, { where: { id } } );
+    }
+
+    private async FindUser(userId: string) : Promise<any>
+    {
+        return await this._users.findOne( { where: { id: userId } } );
+    }
+
     private async GetUserHighScore(userId: string, guildId: string)
     {
-        return await this._highScores.findOne( { where: { id: userId, guildId } } );
+        return await this._highScores.findOne( { where: { userId, guildId } } );
     }
 
     private SetupDatabase(){
 
-        const logging = IsDevelopmentEnv ? console.log : false;
-
         var options = {
             host: DatabaseHost,
             dialect: DatabaseType,
-            logging,
+            logging: false,
         } as sequelize.Options;
 
         if (DatabaseType === DatabaseTypeEnum.Sqlite)
