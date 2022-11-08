@@ -40,7 +40,7 @@ export default class HighScore extends BaseCommand implements ICommand{
     }
 
 
-    public FormatHighScoreArrayToString(highscores: HighScoreType[]): string
+    private FormatHighScoreArrayToString(highscores: HighScoreType[]): string
     {
         const tableResponse: string[] = [];
         

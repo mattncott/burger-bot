@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { Client, userMention } from "discord.js";
-import { LogError, LogInfo } from "./Logger";
+import { LogInfo } from "./Logger";
 import BaseDiscord from "./Discord/BaseDiscord";
 import IDatabase from "./Data/Interfaces/IDatabase";
 import SequelizeDatabase from "./Data/SequelizeDatabase";
@@ -22,7 +22,7 @@ export default class Cron extends BaseDiscord
     public Run() 
     {
         this.RunFuncEveryMinute(async () => {
-            LogError("Recalculating who is currently burgered")
+            LogInfo("Recalculating who is currently burgered")
             
             const allGuildIds = await this._database.GetAllGuilds();
 
@@ -49,7 +49,7 @@ export default class Cron extends BaseDiscord
         });
 
         this.RunFuncEveryDayAtTenPm(async () => {
-            LogError("Calculating who is most burgered today")
+            LogInfo("Calculating who is most burgered today")
             
             const allGuildIds = await this._database.GetAllGuilds();
 

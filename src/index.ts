@@ -3,6 +3,7 @@ import UpgradeDatabaseData from "./Data/UpgradeScripts";
 import DiscordBot from "./Discord/Bot";
 import { EnvironmentMode, IsDevelopmentEnv, DiscordToken, ClientId, DatabaseType } from "./Environment";
 import { isNull } from "./Helper";
+import { LogError, StartUpLog } from "./Logger";
 import { DatabaseTypeEnum } from "./Types/DatabaseType";
 import { ShopItems } from "./Types/ShopItems";
 
@@ -17,10 +18,10 @@ async function Run(){
 }
 
 function SetupDevelopmentEnvironment(): void{
-    console.log(`Starting bot in ${EnvironmentMode} mode`)
+    StartUpLog(`Starting bot in ${EnvironmentMode} mode`)
     if (IsDevelopmentEnv){
         process.on('warning', (warning) => {
-            console.log(warning.stack);
+            LogError(warning.stack);
         });
     }
 }
@@ -53,15 +54,15 @@ async function ValidateDatabase() {
     const database = new SequelizeDatabase();
     await database.ValidateDatabase();
     await UpgradeDatabaseData(database);
-    console.log('Database validated');
+    StartUpLog('Database validated');
 
     // Setup the shop
     try {
         await database.CreateShopItem(ShopItems.Shield, "Shield", 10, "Protect yourself from one burgering");
         await database.CreateShopItem(ShopItems.ShieldPenetrator, "Shield Penetrator", 10, "One time use, ignores a players shield status. Note: If you own a shield, you can't buy this");
 
-        console.log('Shop is setup')
+        StartUpLog('Shop is setup')
     } catch (error) {
-        console.error(error)
+        LogError(error)
     }
 }

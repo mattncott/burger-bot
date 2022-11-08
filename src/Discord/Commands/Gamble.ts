@@ -33,12 +33,23 @@ export default class Gamble extends BaseDiscordCommand implements ICommand{
     public async HandleCommand()
     {
         const wager = this.GetTargetWager();
-        const userPlaying = this._interaction.user.id;
+        const userPlayingId = this._interaction.user.id;
         let selectedUserId = this._interaction.user.id;
         const guildId = this.GetGuildId();
 
         if (guildId === null) {
             this._interaction.reply("This command is only allowed from within a server.");
+            return;
+        }
+
+        try {
+            await this._burgerClass.UserIsAllowedToBurger(userPlayingId);
+        } catch (err: any) {
+            this._interaction.reply({
+                content: err.message,
+                ephemeral: true
+            });
+            
             return;
         }
 
@@ -50,7 +61,7 @@ export default class Gamble extends BaseDiscordCommand implements ICommand{
             return;
         }
 
-        if (!(await this._userWallet.CheckTheresEnoughMoneyInWallet(userPlaying, wager))){
+        if (!(await this._userWallet.CheckTheresEnoughMoneyInWallet(userPlayingId, wager))){
             this._interaction.reply({
                 content: `You do not have enough money to bet this much. Check your balance with /balance`,
                 ephemeral: true,
@@ -59,9 +70,9 @@ export default class Gamble extends BaseDiscordCommand implements ICommand{
             return;
         }
 
-        if (await this._userWallet.WagerIsOverMaxUserBet(userPlaying, wager)) {
+        if (await this._userWallet.WagerIsOverMaxUserBet(userPlayingId, wager)) {
             this._interaction.reply({
-                content: `You cannot bet this much. The max you can bet is ${await this._userWallet.GetMaxAllowedBet(userPlaying)} bc`,
+                content: `You cannot bet this much. The max you can bet is ${await this._userWallet.GetMaxAllowedBet(userPlayingId)} bc`,
                 ephemeral: true,
             });
 
@@ -72,7 +83,7 @@ export default class Gamble extends BaseDiscordCommand implements ICommand{
 
         if (landedOnRandom) {
             // Get all users from highscores as that'll be the most complete
-            const allUserIds = (await this._database.GetAllHighscores(guildId)).filter((user: any) => user.userId !== userPlaying);
+            const allUserIds = (await this._database.GetAllHighscores(guildId)).filter((user: any) => user.userId !== userPlayingId);
 
             if (allUserIds.length === 0){
                 this._interaction.reply(`Not enough users have interacted with the burger bot to play gamble yet.`);
@@ -83,14 +94,14 @@ export default class Gamble extends BaseDiscordCommand implements ICommand{
             selectedUserId = allUserIds[randomPosition].userId;
         }
 
-        if (selectedUserId !== userPlaying){
-            await this._burgerClass.SetSuccessBurgerDatabaseValues(selectedUserId, userPlaying, false);
-            await this._userWallet.IncreaseUserWalletByAmount(userPlaying, wager);
-            this._interaction.reply(`${userMention(userPlaying)} played gamble and just burgered ${userMention(selectedUserId)} and won ${wager} bc`);
+        if (selectedUserId !== userPlayingId){
+            await this._burgerClass.SetSuccessBurgerDatabaseValues(selectedUserId, userPlayingId, false);
+            await this._userWallet.IncreaseUserWalletByAmount(userPlayingId, wager);
+            this._interaction.reply(`${userMention(userPlayingId)} played gamble and just burgered ${userMention(selectedUserId)} and won ${wager} bc`);
         } else {
-            await this._burgerClass.SetUserFailedBurgerDatabaseValues(userPlaying);
-            await this._userWallet.DecreaseUserWallet(userPlaying, wager);
-            this._interaction.reply(`${userMention(userPlaying)} played gamble and just burgered themselves and lost ${wager} bc`);
+            await this._burgerClass.SetUserFailedBurgerDatabaseValues(userPlayingId);
+            await this._userWallet.DecreaseUserWallet(userPlayingId, wager);
+            this._interaction.reply(`${userMention(userPlayingId)} played gamble and just burgered themselves and lost ${wager} bc`);
         }
     }
 

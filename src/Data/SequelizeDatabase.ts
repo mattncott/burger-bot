@@ -74,7 +74,7 @@ export default class SequelizeDatabase implements IDatabase
 
         this._highScores.create(
             {
-                userId: userId,
+                userId,
                 guildId
             });
 

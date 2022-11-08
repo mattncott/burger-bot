@@ -158,4 +158,20 @@ describe('Burger Command tests', () => {
     });
   });
 
+  test('When attempting to gamble when on a cooldown, you get the correct reply', async () => {
+
+    const coolDownDate = new Date();
+    coolDownDate.setMinutes(coolDownDate.getMinutes() + 10);
+
+    mockDatabase.GetUser.mockReturnValue(Promise.resolve({
+      coolDown: coolDownDate
+    }));
+
+    await gambleClass.HandleCommand();
+    expect(mockInteraction.reply).toHaveBeenCalledWith({
+        content: `You can't send a Burger right now. You're on a cooldown for 10 minutes`,
+        ephemeral: true
+    });
+  });
+
 });

@@ -5,6 +5,7 @@ import { IsUserOnCooldown, TimeDifferenceInMinutes } from "../../Helper";
 import { Roles } from "../../Types/Roles";
 import BaseDiscordCommand from "./BaseDiscordCommand";
 import ICommand from "./interfaces/ICommand";
+import { User as UserType } from "../../types/User";
 
 export default class Burger extends BaseDiscordCommand implements ICommand {
 
@@ -41,15 +42,19 @@ export default class Burger extends BaseDiscordCommand implements ICommand {
             targetUser = sendingUser;
         }
 
+
+
         await this._database.GetUser(targetUser.id);
 
-        const user = await this._database.GetUser(sendingUser.id);
 
-        if (IsUserOnCooldown(user?.coolDown)) {
+        try {
+            await this.UserIsAllowedToBurger(sendingUser.id);
+        } catch (err: any) {
             this._interaction.reply({
-                content: `You can't send a Burger right now. You're on a cooldown for ${TimeDifferenceInMinutes(user.coolDown)} minutes`,
+                content: err.message,
                 ephemeral: true
             });
+            
             return;
         }
 
@@ -70,6 +75,15 @@ export default class Burger extends BaseDiscordCommand implements ICommand {
         
         await this.SetSuccessBurgerDatabaseValues(targetUser.id, sendingUser.id);
         await this._interaction.reply(interactionReplyMessage);
+    }
+
+    public async UserIsAllowedToBurger(userId: string): Promise<void>
+    {
+        const user = await this._database.GetUser(userId);
+
+        if (IsUserOnCooldown(user?.coolDown)) {
+            throw new Error(`You can't send a Burger right now. You're on a cooldown for ${TimeDifferenceInMinutes(user.coolDown)} minutes`);
+        }
     }
 
     private async ProcessIfUserHasShield(targetUserHasShield: boolean, userShieldPentratorStatus: boolean, targetUser: User, sendingUser: User): Promise<boolean> {

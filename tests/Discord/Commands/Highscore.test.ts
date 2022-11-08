@@ -62,7 +62,6 @@ describe('Balance Command tests', () => {
     mockDatabase.GetAllHighscores.mockReturnValue(Promise.resolve(highscores));
 
     const expectedResult = FormatHighScoreArrayToString(highscores)
-    console.log(expectedResult);
 
     await classUnderTest.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
