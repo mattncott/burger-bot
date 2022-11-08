@@ -10,7 +10,6 @@ export default class Gamble extends BaseDiscordCommand implements ICommand{
 
     private _interaction: ChatInputCommandInteraction;
     private _burgerClass: Burger;
-    // private _guildId: string | null;
 
     constructor(interaction: ChatInputCommandInteraction, discordClient: Client, database?: IDatabase, userWallet?: IUserWallet)
     {
@@ -73,25 +72,25 @@ export default class Gamble extends BaseDiscordCommand implements ICommand{
 
         if (landedOnRandom) {
             // Get all users from highscores as that'll be the most complete
-            const allUserIds = (await this._database.GetAllHighscores(guildId)).filter((user: any) => user.id !== userPlaying);
+            const allUserIds = (await this._database.GetAllHighscores(guildId)).filter((user: any) => user.userId !== userPlaying);
 
             if (allUserIds.length === 0){
-                this._interaction.reply(`Not enough users have interacted with the burger bot to play roulette yet.`);
+                this._interaction.reply(`Not enough users have interacted with the burger bot to play gamble yet.`);
                 return;   
             }
 
             const randomPosition = Math.floor(Math.random() * allUserIds.length);
-            selectedUserId = allUserIds[randomPosition].id;
+            selectedUserId = allUserIds[randomPosition].userId;
         }
 
         if (selectedUserId !== userPlaying){
             await this._burgerClass.SetSuccessBurgerDatabaseValues(selectedUserId, userPlaying, false);
             await this._userWallet.IncreaseUserWalletByAmount(userPlaying, wager);
-            this._interaction.reply(`${userMention(userPlaying)} played roulette and just burgered ${userMention(selectedUserId)} and won ${wager} bc`);
+            this._interaction.reply(`${userMention(userPlaying)} played gamble and just burgered ${userMention(selectedUserId)} and won ${wager} bc`);
         } else {
             await this._burgerClass.SetUserFailedBurgerDatabaseValues(userPlaying);
             await this._userWallet.DecreaseUserWallet(userPlaying, wager);
-            this._interaction.reply(`${userMention(userPlaying)} played roulette and just burgered themselves and lost ${wager} bc`);
+            this._interaction.reply(`${userMention(userPlaying)} played gamble and just burgered themselves and lost ${wager} bc`);
         }
     }
 

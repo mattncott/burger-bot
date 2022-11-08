@@ -19,12 +19,12 @@ describe('Burger Command tests', () => {
   const mockUser = mock<User>();
 
   beforeEach(() => {
-    mockUser.id = "1";
+    mockUser.id = "123453234245";
     mockInteraction.user = mockUser;
 
     const userHighscores: HighScoreType[] = [
-      { id: "1", numberOfBurgers: 0, numberOfTimesBurgered: 0},
-      { id: "2", numberOfBurgers: 0, numberOfTimesBurgered: 0},
+      { id: "1", numberOfBurgers: 0, userId: "123453234245", numberOfTimesBurgered: 0},
+      { id: "2", numberOfBurgers: 0, userId: "123453232422", numberOfTimesBurgered: 0},
     ];
 
     mockUserWallet.CheckTheresEnoughMoneyInWallet.mockReturnValue(Promise.resolve(true));
@@ -53,39 +53,39 @@ describe('Burger Command tests', () => {
     expect(mockInteraction.reply).toHaveBeenCalledWith("This command is only allowed from within a server.");
   });
 
-  test('When someone plays roulette and hits themself, the correct reply appears', async () => {
+  test('When someone plays gamble and hits themself, the correct reply appears', async () => {
 
     const handleGetWhoToLandOnRandomOrYourself = jest.spyOn(Gamble.prototype as any, 'GetWhoToLandOnRandomOrYourself');
     handleGetWhoToLandOnRandomOrYourself.mockImplementation(() => false);
 
     await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
-    expect(mockInteraction.reply).toHaveBeenCalledWith(`<@1> played roulette and just burgered themselves and lost 10 bc`);
+    expect(mockInteraction.reply).toHaveBeenCalledWith(`<@123453234245> played gamble and just burgered themselves and lost 10 bc`);
   });
 
-  test('When someone plays roulette and hits someone else, the correct reply appears', async () => {
+  test('When someone plays gamble and hits someone else, the correct reply appears', async () => {
 
     const handleGetWhoToLandOnRandomOrYourself = jest.spyOn(Gamble.prototype as any, 'GetWhoToLandOnRandomOrYourself');
     handleGetWhoToLandOnRandomOrYourself.mockImplementation(() => true);
 
     await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
-    expect(mockInteraction.reply).toHaveBeenCalledWith(`<@1> played roulette and just burgered <@2> and won 10 bc`);
+    expect(mockInteraction.reply).toHaveBeenCalledWith(`<@123453234245> played gamble and just burgered <@123453232422> and won 10 bc`);
   });
 
-  test('When someone plays roulette and not enough players have been stored, correct reply appears', async () => {
+  test('When someone plays gamble and not enough players have been stored, correct reply appears', async () => {
 
     const handleGetWhoToLandOnRandomOrYourself = jest.spyOn(Gamble.prototype as any, 'GetWhoToLandOnRandomOrYourself');
     handleGetWhoToLandOnRandomOrYourself.mockImplementation(() => true);
 
     const userHighscores: HighScoreType[] = [
-      { id: "1", numberOfBurgers: 0, numberOfTimesBurgered: 0},
+      { id: "1", userId: "123453234245", numberOfBurgers: 0, numberOfTimesBurgered: 0},
     ];
     mockDatabase.GetAllHighscores.mockReturnValue(Promise.resolve(userHighscores));
 
     await gambleClass.HandleCommand();
     expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
-    expect(mockInteraction.reply).toHaveBeenCalledWith(`Not enough users have interacted with the burger bot to play roulette yet.`);
+    expect(mockInteraction.reply).toHaveBeenCalledWith(`Not enough users have interacted with the burger bot to play gamble yet.`);
   });
 
   test('When someone plays and wagers a value less than 0, correct reply appears', async () => {
