@@ -5,7 +5,6 @@ import { IsUserOnCooldown, TimeDifferenceInMinutes } from "../../Helper";
 import { Roles } from "../../Types/Roles";
 import BaseDiscordCommand from "./BaseDiscordCommand";
 import ICommand from "./interfaces/ICommand";
-import { User as UserType } from "../../types/User";
 
 export default class Burger extends BaseDiscordCommand implements ICommand {
 
