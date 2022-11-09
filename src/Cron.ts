@@ -1,22 +1,24 @@
 import cron from "node-cron";
-import { Client, userMention } from "discord.js";
+import { ChatInputCommandInteraction, Client } from "discord.js";
 import { LogInfo } from "./Logger";
 import BaseDiscord from "./Discord/BaseDiscord";
 import IDatabase from "./Data/Interfaces/IDatabase";
 import SequelizeDatabase from "./Data/SequelizeDatabase";
-import { HighScoreType } from "./Types/HighScoreType";
 import { Roles } from "./Types/Roles";
 import { User } from "./Types/User";
+import HighScore from "./Discord/Commands/Highscore";
 
 export default class Cron extends BaseDiscord
 {
     private readonly _database: IDatabase;
+    private readonly _highscoreClass: HighScore;
 
     constructor(discordBot: Client, database?: IDatabase)
     {
         super(discordBot);
 
         this._database = database === null || database === undefined ? new SequelizeDatabase() : database;
+        this._highscoreClass = new HighScore({} as ChatInputCommandInteraction, discordBot, database);
     }
 
     public Run() 
@@ -49,37 +51,7 @@ export default class Cron extends BaseDiscord
         });
 
         this.RunFuncEveryDayAtTenPm(async () => {
-            LogInfo("Calculating who is most burgered today")
-            
-            const allGuildIds = await this._database.GetAllGuilds();
-
-            for (let i = 0; allGuildIds.length - 1>= i; i++){
-                const guild = this.GetDiscordGuild(allGuildIds[i].id);
-
-                const mostBurgeredRole = await this.GetOrCreateRole(Roles.MostBurgered, {}, guild);
-                const mostBurgeredUser = mostBurgeredRole.members.first();
-                if (mostBurgeredUser !== undefined){
-                    this.RemoveUserFromRole(guild, mostBurgeredRole, mostBurgeredUser.id);
-                }
-
-                const allHighscoresForGuild = await this._database.GetAllHighscores(guild.id);
-
-                if (allHighscoresForGuild.length === 0) {
-                    LogInfo(`No highscores for guild ${guild.id}`)
-                    return;
-                }
-                const mostBurgered = allHighscoresForGuild.reduce((p: HighScoreType, c: HighScoreType) => p.numberOfTimesBurgered >= c.numberOfTimesBurgered ? p : c);
-                this.AddUserToRole(guild, mostBurgeredRole, mostBurgered.id);
-
-                const channel = await this.GetChannelToSendMessageTo(guild);
-
-                LogInfo(channel?.id);
-                if (channel !== undefined){
-                    this.SendMessageToChannel(channel.id, `${userMention(mostBurgered.id)} was the most burgered today! They've been given the most burgered role!`);
-                }
-            }
-
-            await this._database.ClearHighscores();
+            await this._highscoreClass.CalculateMostBurgeredToday();
         });
     }
 

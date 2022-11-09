@@ -63,7 +63,7 @@ export default class DiscordBot {
                             await burgerClass.HandleCommand();
                             break;
                         case 'highscore':
-                            const highscoreClass = new HighScore(interaction);
+                            const highscoreClass = new HighScore(interaction, client);
                             await highscoreClass.HandleCommand();
                             break;
                         case 'balance':
