@@ -62,7 +62,7 @@ export default class Cron extends BaseDiscord
 
     private RunFuncEveryDayAtTenPm(func: () => void): void
     {
-        cron.schedule('* 22 * * *', func, {
+        cron.schedule('0 22 * * *', func, {
             scheduled: true,
             timezone: "Europe/London"
         });
