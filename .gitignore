@@ -68,5 +68,5 @@ node_modules/
 .env.dev
 .env.prod
 
-*.sqlite
-database.sqlite
+#*.sqlite
+#database.sqlite
