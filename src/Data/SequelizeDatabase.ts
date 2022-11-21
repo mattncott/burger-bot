@@ -205,6 +205,7 @@ export default class SequelizeDatabase implements IDatabase
     public async ClearHighscores(): Promise<void>
     {
         await this._highScores.drop();
+        await this.ValidateDatabase();
     }
 
     public async UpdateHighScoreUserId(userId: string, id: string): Promise<void>
