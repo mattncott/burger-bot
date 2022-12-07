@@ -10,30 +10,28 @@ import Status from "./Commands/Status";
 import User from "./User";
 import Cron from "../Cron";
 import DiscordHandler from "./DiscordHandler";
-import IDatabase from "../Data/Interfaces/IDatabase";
-import SequelizeDatabase from "../Data/SequelizeDatabase";
 import { SlashCommandBuilder, Routes } from 'discord.js';
 import { REST }  from '@discordjs/rest';
 import { LogInfo } from '../Logger';
+import { IDiscordBot } from "./Interfaces/IDiscordBot";
+import { BaseDiscordBot } from "./BaseDiscordBot";
 
-export default class DiscordBot {
+export default class DiscordBot extends BaseDiscordBot implements IDiscordBot {
 
-    private readonly _database: IDatabase;
-
-    constructor(database?: IDatabase) {
-        this._database = database === null || database === undefined ? new SequelizeDatabase() : database;
+    constructor() {
+        super();
     }
 
-    public async Start()
+    public async Start(): Promise<void>
     {
-        var client = null as unknown as Client;
+        let client = null as unknown as Client;
         try {
             // Create a new client instance
             client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
             // When the client is ready, run this code (only once)
             client.once('ready', () => {
-                StartUpLog('Bot is online!');
+                StartUpLog('Discord Bot is online!');
 
                 // start cron
                 const cron = new Cron(client);
@@ -128,7 +126,7 @@ export default class DiscordBot {
                 .addIntegerOption(option => option.setRequired(true).setName('wager').setDescription('How much are you betting?'))
         ];
     
-        var commandsAsJson = commands.map(command => command.toJSON());
+        const commandsAsJson = commands.map(command => command.toJSON());
         
         const rest = new REST({ version: '10' }).setToken(DiscordToken);
         

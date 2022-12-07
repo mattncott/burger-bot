@@ -225,7 +225,7 @@ export default class SequelizeDatabase implements IDatabase
 
     private SetupDatabase(){
 
-        var options = {
+        const options = {
             host: DatabaseHost,
             dialect: DatabaseType,
             logging: false,

@@ -18,7 +18,7 @@ export class UserWallet implements IUserWallet {
 
     public async IncreaseUserWallet(userId: string): Promise<void> {
         // TODO Does the user have any wallet multipliers??? If so increase this value
-        var walletIncreaseBy = this._baseWalletIncrease;
+        const walletIncreaseBy = this._baseWalletIncrease;
 
         await this.IncreaseUserWalletByAmount(userId, walletIncreaseBy);
     }

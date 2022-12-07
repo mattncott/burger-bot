@@ -27,7 +27,7 @@ export default class HighScore extends BaseDiscordCommand implements ICommand{
             return;
         }
 
-        var highscores = await this._database.GetAllHighscores(this._guildId);
+        const highscores = await this._database.GetAllHighscores(this._guildId);
 
         if (highscores.length === 0) {
             await this._interaction.reply({
@@ -52,7 +52,6 @@ export default class HighScore extends BaseDiscordCommand implements ICommand{
             const mostBurgeredRole = await this.GetOrCreateRole(Roles.MostBurgered, {}, guild);
             const mostBurgeredUser = mostBurgeredRole.members.first();
             if (mostBurgeredUser !== undefined){
-                console.log('has most burgered');
                 await this.RemoveUserFromRole(guild, mostBurgeredRole, mostBurgeredUser.id);
             }
 

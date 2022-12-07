@@ -1,6 +1,7 @@
 import SequelizeDatabase from "./Data/SequelizeDatabase";
 import UpgradeDatabaseData from "./Data/UpgradeScripts";
 import DiscordBot from "./Discord/Bot";
+import LegacyDiscordBot from "./Discord/LegacyBot";
 import { EnvironmentMode, IsDevelopmentEnv, DiscordToken, ClientId, DatabaseType } from "./Environment";
 import { isNull } from "./Helper";
 import { LogError, StartUpLog } from "./Logger";
@@ -12,9 +13,7 @@ Run();
 async function Run(){
     SetupDevelopmentEnvironment();
     await ValidateDatabase();
-    StartBot();
-    // TODO Add image listener back
-    // ListenForImages();
+    StartDiscordBot();
 }
 
 function SetupDevelopmentEnvironment(): void{
@@ -42,11 +41,14 @@ function ValidateEnvironmentVariables(): void {
     }
 }
 
-function StartBot() {
+function StartDiscordBot() {
     (async () => {
-        const bot = new DiscordBot();
-        bot.RegisterCommands();
-        bot.Start();
+        const legacyDiscordBot = new LegacyDiscordBot();
+        await legacyDiscordBot.Start();
+
+        const discordBot = new DiscordBot();
+        await discordBot.RegisterCommands();
+        await discordBot.Start();
     })();
 }
 

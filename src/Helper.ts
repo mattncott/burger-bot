@@ -29,7 +29,7 @@ export function IsUserOnCooldown(userCooldown: Date): boolean {
 export function TimeDifferenceInMinutes(dt2: Date) 
 {
     const dt1 = new Date();
-    var diff =(dt2.getTime() - dt1.getTime()) / 1000;
+    let diff =(dt2.getTime() - dt1.getTime()) / 1000;
     diff /= 60;
     return Math.abs(Math.round(diff));
 }

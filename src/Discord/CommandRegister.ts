@@ -40,7 +40,7 @@ export function RegisterCommands(){
         new SlashCommandBuilder().setName('user').setDescription('Replies with user info!'));
     }
 
-    var commandsAsJson = commands.map(command => command.toJSON());
+    const commandsAsJson = commands.map(command => command.toJSON());
     
     const rest = new REST({ version: '10' }).setToken(DiscordToken);
     
