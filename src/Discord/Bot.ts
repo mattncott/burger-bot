@@ -15,6 +15,7 @@ import { REST }  from '@discordjs/rest';
 import { LogInfo } from '../Logger';
 import { IDiscordBot } from "./Interfaces/IDiscordBot";
 import { BaseDiscordBot } from "./BaseDiscordBot";
+import CheckSpoiler from "./Commands/CheckSpoiler";
 
 export default class DiscordBot extends BaseDiscordBot implements IDiscordBot {
 
@@ -80,6 +81,10 @@ export default class DiscordBot extends BaseDiscordBot implements IDiscordBot {
                             const rouletteClass = new Gamble(interaction, client);
                             await rouletteClass.HandleCommand();
                             break;
+                        case 'check':
+                            const checkSpoiler = new CheckSpoiler(interaction);
+                            await checkSpoiler.HandleCommand();
+                            break;
                     }
                 } catch (error) {
                     LogError(error);
@@ -104,6 +109,13 @@ export default class DiscordBot extends BaseDiscordBot implements IDiscordBot {
                     subcommand
                         .setName('user').setDescription('The person to burger')
                         .addUserOption(option => option.setName('target').setDescription('The user'))),
+            new SlashCommandBuilder()
+                .setName('check')
+                .setDescription('Checks a spoiler image for a potential burgering')
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('spoiler').setDescription('The URL of the image to check')
+                        .addStringOption(option => option.setName('messageid').setDescription('The MessageID of the image to check'))),
             new SlashCommandBuilder()
                 .setName('highscore')
                 .setDescription('Burger Highscores'),

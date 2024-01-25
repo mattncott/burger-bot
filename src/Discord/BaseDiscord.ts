@@ -48,7 +48,7 @@ export default class BaseDiscord
             if (!foundChannel){
                 channel = channels.find(ch => ch.name.includes(chan))
 
-                if (channel !== undefined) {
+                if (channel != null) {
                     foundChannel = true;
                 }
             }

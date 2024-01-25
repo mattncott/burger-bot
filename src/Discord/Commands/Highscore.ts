@@ -51,7 +51,7 @@ export default class HighScore extends BaseDiscordCommand implements ICommand{
 
             const mostBurgeredRole = await this.GetOrCreateRole(Roles.MostBurgered, {}, guild);
             const mostBurgeredUser = mostBurgeredRole.members.first();
-            if (mostBurgeredUser !== undefined){
+            if (mostBurgeredUser != null){
                 await this.RemoveUserFromRole(guild, mostBurgeredRole, mostBurgeredUser.id);
             }
 
@@ -67,7 +67,7 @@ export default class HighScore extends BaseDiscordCommand implements ICommand{
             const channel = await this.GetChannelToSendMessageTo(guild);
 
             LogInfo(channel?.id);
-            if (channel !== undefined){
+            if (channel != null){
                 this.SendMessageToChannel(channel.id, `${userMention(mostBurgered.userId)} was the most burgered today! They've been given the most burgered role!`);
             }
         }

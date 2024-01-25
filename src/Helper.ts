@@ -18,7 +18,7 @@ export function getAttachment(attachments: any): Attachment {
 
 export function IsUserOnCooldown(userCooldown: Date): boolean {
 
-    if (userCooldown !== null && userCooldown !== undefined) {
+    if (userCooldown != null) {
         const now = new Date();
         return userCooldown > now;
     }

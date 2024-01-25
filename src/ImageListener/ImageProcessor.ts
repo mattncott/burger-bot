@@ -1,38 +1,35 @@
 import { isNull } from "../Helper";
 import IImageProcessor from "./Interfaces/ITensorFlow";
 import { Tensor3D } from "@tensorflow/tfjs-node";
-import { Client } from "discord.io";
-import { Attachment } from "../Types/Attachment";
 import { LogError } from "../Logger";
 import { ImageType } from "../Types/ImageType";
 
 import * as fs from "fs";
 import * as jimp from "jimp";
-import { userMention } from "discord.js";
+import { Attachment, ChatInputCommandInteraction } from "discord.js";
 
 export default class ImageProcessor {
 
     private readonly _predictionsToDetect: string[];
     private readonly _imageProcessor: IImageProcessor;
-    private readonly _discordBot: Client;
+    private readonly _interaction: ChatInputCommandInteraction;
 
     private readonly _imageDirectory = "/images/";
 
-    constructor(predictionsToDetect: string[], imageProcessor: IImageProcessor, discordBot: Client)
+    constructor(predictionsToDetect: string[], imageProcessor: IImageProcessor, interaction: ChatInputCommandInteraction)
     {
         this._predictionsToDetect = predictionsToDetect;
         this._imageProcessor = imageProcessor;
-        this._discordBot = discordBot;
+        this._interaction = interaction;
     }
 
-    public async ProcessImage(imageAttachment: Attachment, channelId: string, userId: string): Promise<any> {
-        const imageType = imageAttachment.content_type as ImageType;
+    public async ProcessImage(imageAttachment: Attachment): Promise<any> {
+        const imageType = imageAttachment.contentType as ImageType;
         const imageUrl = imageAttachment.url;
         
         if (!Object.values(ImageType).includes(imageType)) {
-            this._discordBot.sendMessage({
-                to: channelId,
-                message: `Image type not supported`
+            this._interaction.editReply({
+                content: `Image type not supported`
             });
             return;
         }
@@ -44,27 +41,23 @@ export default class ImageProcessor {
             const imageMatchesPrediction = await this.ClassifyImageAndCheckPredictions(image);
     
             if (imageMatchesPrediction) {
-                this._discordBot.sendMessage({
-                    to: channelId,
-                    message: `I have analysed the last spoiler sent. This is a burger. For your safety do not click, or you will be burgered. ${userMention(userId)} shame on you!`});
+                this._interaction.editReply({
+                    content: `I have analysed the last spoiler sent. This is a burger. For your safety do not click, or you will be burgered.`});
             } else {
-                this._discordBot.sendMessage({
-                    to: channelId, 
-                    message: `I have analzed the last spoiler sent. I don't think it has a burger in it.`
+                this._interaction.editReply({
+                    content: `I have analzed the last spoiler sent. I don't think it has a burger in it.`
                 });
             }
         } catch (error: any) {
             LogError(error);
 
             if (error.message.includes("but the requested shape requires a multiple of")) {
-                this._discordBot.sendMessage({
-                    to: channelId,
-                    message: `Image resolution is too high. I can't check this :/`
+                this._interaction.editReply({
+                    content: `Image resolution is too high. I can't check this :/`
                 });
             } else {
-                this._discordBot.sendMessage({
-                    to: channelId,
-                    message: `Something happened and I can't analyse this.`
+                this._interaction.editReply({
+                    content: `Something happened and I can't analyse this.`
                 });
             }
         }

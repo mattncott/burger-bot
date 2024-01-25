@@ -1,7 +1,6 @@
 import SequelizeDatabase from "./Data/SequelizeDatabase";
 import UpgradeDatabaseData from "./Data/UpgradeScripts";
 import DiscordBot from "./Discord/Bot";
-import LegacyDiscordBot from "./Discord/LegacyBot";
 import { EnvironmentMode, IsDevelopmentEnv, DiscordToken, ClientId, DatabaseType } from "./Environment";
 import { isNull } from "./Helper";
 import { LogError, StartUpLog } from "./Logger";
@@ -43,9 +42,6 @@ function ValidateEnvironmentVariables(): void {
 
 function StartDiscordBot() {
     (async () => {
-        const legacyDiscordBot = new LegacyDiscordBot();
-        await legacyDiscordBot.Start();
-
         const discordBot = new DiscordBot();
         await discordBot.RegisterCommands();
         await discordBot.Start();
