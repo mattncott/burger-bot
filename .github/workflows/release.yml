@@ -8,5 +8,5 @@ jobs:
     name: Release Node Application
     uses: ./.github/workflows/release-docker.yml
     with:
-      docker-image-name: docker.mattncott.co.uk/burger-bot
+      docker-image-name: mattncott/burger-bot
     secrets: inherit
