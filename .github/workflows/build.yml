@@ -23,7 +23,6 @@ jobs:
           tag-prefix: 'v'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PACKAGEJSON_DIR: 'UI'
       - name: 'cat package.json'
         run: cat ./package.json
       - name: 'Output Step'
