@@ -27,6 +27,7 @@ export default class Cron extends BaseDiscord
             LogInfo("Recalculating who is currently burgered")
             
             const allGuildIds = await this._database.GetAllGuilds();
+            
 
             allGuildIds.forEach(async (g: any) => {
                 const guild = this.GetDiscordGuild(g.id);

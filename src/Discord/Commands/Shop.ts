@@ -28,7 +28,7 @@ export default class Shop extends BaseCommand implements ICommand{
         this._shopItems = await this._database.GetAllShopItems();
         const userId = this._interaction.user.id;
 
-        if (item !== null && item !== undefined){
+        if (item != null){
             this.PurchaseItem(item, userId);
             return;
         }
