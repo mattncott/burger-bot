@@ -1,11 +1,13 @@
-FROM node:16
+FROM node
+WORKDIR /usr/burger-bot
 
-WORKDIR /burger-bot
+COPY package.json .
 
-COPY package.json package.json
-
-RUN npm install
+RUN npm install && npm install typescript -g
 
 COPY . .
+COPY .env.example .env
 
-CMD [ "npm", "start" ]
+RUN tsc
+
+CMD ["node", "./lib/index.js"]

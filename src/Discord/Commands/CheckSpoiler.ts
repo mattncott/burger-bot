@@ -45,18 +45,18 @@ export default class CheckSpoiler extends BaseCommand implements ICommand{
                 content: `${userMention(sendingUser.id)} is checking a Spoiler Image....`,
             });
 
-            spoilerAttachments.forEach(attachment => {
+            spoilerAttachments.forEach((attachment: Attachment) => {
                 this._imageProcessor.ProcessImage(attachment);
             })
         }
     }
 
-    private GetSpoilerAttachments(message: Message<false> | Message<true> | undefined): Collection<string, Attachment> | null {
+    private GetSpoilerAttachments(message: Message<boolean> | undefined): Collection<string, Attachment> | null {
         if (message == null) {
             return null
         }
 
-        return message.attachments.filter((attachment) => attachment.spoiler)
+        return message.attachments.filter((attachment: Attachment) => attachment.spoiler)
     }
 }
 

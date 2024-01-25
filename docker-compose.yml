@@ -1,17 +1,10 @@
 version: "3.2"
 services:
   burger-bot:
+    platform: linux/x86_64
     container_name: 'burger-bot'
     image: mattncott/burger-bot:master
     network_mode: host
-    environment:
-        - host=127.0.0.1
-        - NODE_ENV=production
-        - token=
-        - clientid=
-        - guildid=
-        - channelId=
-        - DatabaseHost=
-        - DatabaseType=
-        - DbUser=
-        - DbPassword=
+    volumes:
+      - ./.env:/usr/burger-bot/.env
+    

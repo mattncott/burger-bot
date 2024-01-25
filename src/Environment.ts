@@ -11,5 +11,5 @@ export const DatabaseType = isNull(process.env.databasetype) ? 'sqlite' : getEnv
 export const IsDevelopmentEnv = EnvironmentMode !== 'production';
 
 function getEnvironmentVar(environmentVar: undefined | string): string {
-    return environmentVar === undefined ? "" : environmentVar;
+    return environmentVar == null ? "" : environmentVar;
 }

@@ -9,8 +9,7 @@
     "target": "es2017",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "allowJs": true
+    "esModuleInterop": true
   },
   "compileOnSave": true,
   "include": [

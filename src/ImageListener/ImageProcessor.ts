@@ -42,10 +42,10 @@ export default class ImageProcessor {
     
             if (imageMatchesPrediction) {
                 this._interaction.editReply({
-                    content: `I have analysed the last spoiler sent. This is a burger. For your safety do not click, or you will be burgered.`});
+                    content: `I have analysed the spoilered image. This is an attempted burgering. For your safety do not click, or you will be burgered.`});
             } else {
                 this._interaction.editReply({
-                    content: `I have analzed the last spoiler sent. I don't think it has a burger in it.`
+                    content: `I have analzed the last spoiler sent. I don't think it's a burgering.`
                 });
             }
         } catch (error: any) {
