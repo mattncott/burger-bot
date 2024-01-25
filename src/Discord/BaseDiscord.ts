@@ -1,4 +1,4 @@
-import { Client, CreateRoleOptions, Guild, NonThreadGuildBasedChannel, Role, TextChannel } from "discord.js";
+import { Client, Guild, NonThreadGuildBasedChannel, Role, TextChannel } from "discord.js";
 import { IsDevelopmentEnv } from "../Environment";
 import { LogError } from "../Logger";
 
@@ -14,7 +14,7 @@ export default class BaseDiscord
     protected async AddUserToRole(guild: Guild, role: Role, userId: string): Promise<void>
     {
         try {
-            const user = guild.members.cache.find(user => user.id === userId);
+            const user = guild.members.cache.find((user: any) => user.id === userId);
             user?.roles.add(role);
         } catch (err) {
             LogError(err);
@@ -24,7 +24,7 @@ export default class BaseDiscord
     protected async RemoveUserFromRole(guild: Guild, role: Role, userId: string): Promise<void>
     {
         try {
-            const user = guild.members.cache.find(user => user.id === userId);
+            const user = guild.members.cache.find((user: any) => user.id === userId);
             user?.roles.remove(role);
         } catch (err) {
             LogError(err);
@@ -46,7 +46,7 @@ export default class BaseDiscord
 
         channelAllowedToMessage.forEach((chan) => {
             if (!foundChannel){
-                channel = channels.find(ch => ch.name.includes(chan))
+                channel = channels.find((ch: any) => ch.name.includes(chan))
 
                 if (channel != null) {
                     foundChannel = true;
@@ -74,7 +74,7 @@ export default class BaseDiscord
         return guild;
     }
 
-    protected async GetOrCreateRole(roleName: string, roleData: CreateRoleOptions, guild: string | Guild): Promise<Role>
+    protected async GetOrCreateRole(roleName: string, roleData: any, guild: string | Guild): Promise<Role>
     {
         if (typeof guild === 'string'){
             guild = this.GetDiscordGuild(guild);

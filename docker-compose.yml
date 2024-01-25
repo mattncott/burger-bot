@@ -1,9 +1,17 @@
-version: '3'
+version: "3.2"
 services:
-
-  burgerbot:
-    depends_on: 
-      - sqlite3
-    container_name: burger-bot
-    build: .
-    
+  burger-bot:
+    container_name: 'burger-bot'
+    image: mattncott/burger-bot:master
+    network_mode: host
+    environment:
+        - host=127.0.0.1
+        - NODE_ENV=production
+        - token=MTAxMjI1NjU1OTkwMTk3ODYyNg.GQKkbl.NmY0t_FzKOW0Wyiqmt9VMZw1IHVFN7zqSjTNvk
+        - clientid=1012256559901978626
+        - guildid=1011353740441296969
+        - channelId=1011353740999151758
+        - DatabaseHost=database.sqlite
+        - DatabaseType=sqlite
+        - DbUser=root
+        - DbPassword=pass

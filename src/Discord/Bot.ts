@@ -105,17 +105,17 @@ export default class DiscordBot extends BaseDiscordBot implements IDiscordBot {
             new SlashCommandBuilder()
                 .setName('burger')
                 .setDescription('Burger Someone')
-                .addSubcommand(subcommand =>
+                .addSubcommand((subcommand: any) =>
                     subcommand
                         .setName('user').setDescription('The person to burger')
-                        .addUserOption(option => option.setName('target').setDescription('The user'))),
+                        .addUserOption((option: any) => option.setName('target').setDescription('The user'))),
             new SlashCommandBuilder()
                 .setName('check')
                 .setDescription('Checks a spoiler image for a potential burgering')
-                .addSubcommand(subcommand =>
+                .addSubcommand((subcommand: any) =>
                     subcommand
                         .setName('spoiler').setDescription('The URL of the image to check')
-                        .addStringOption(option => option.setName('messageid').setDescription('The MessageID of the image to check'))),
+                        .addStringOption((option: any) => option.setName('messageid').setDescription('The MessageID of the image to check'))),
             new SlashCommandBuilder()
                 .setName('highscore')
                 .setDescription('Burger Highscores'),
@@ -125,7 +125,7 @@ export default class DiscordBot extends BaseDiscordBot implements IDiscordBot {
             new SlashCommandBuilder()
                 .setName('shop')
                 .setDescription('See what you can buy in the shop.')
-                .addIntegerOption(option =>
+                .addIntegerOption((option: any) =>
                     option
                         .setName('item')
                         .setDescription('What you would like to buy')),
@@ -135,7 +135,7 @@ export default class DiscordBot extends BaseDiscordBot implements IDiscordBot {
             new SlashCommandBuilder()
                 .setName('gamble')
                 .setDescription('Wager a bet? Will you burger yourself or someone random?')
-                .addIntegerOption(option => option.setRequired(true).setName('wager').setDescription('How much are you betting?'))
+                .addIntegerOption((option: any) => option.setRequired(true).setName('wager').setDescription('How much are you betting?'))
         ];
     
         const commandsAsJson = commands.map(command => command.toJSON());
