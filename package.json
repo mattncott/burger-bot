@@ -16,7 +16,7 @@
     "@tensorflow/tfjs-node": "^4.1.0",
     "axios": "^1.6.4",
     "discord.js": "^14.8.0",
-    "dotenv": "^16.0.2",
+    "dotenv": "^16.3.1",
     "jimp": "^0.17.0",
     "jpeg-js": "^0.4.4",
     "mysql2": "^2.3.3",
