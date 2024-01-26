@@ -13,7 +13,7 @@
   "dependencies": {
     "@discordjs/rest": "^1.7.1",
     "@tensorflow-models/mobilenet": "^2.1.0",
-    "@tensorflow/tfjs-node": "^4.1.0",
+    "@tensorflow/tfjs-node": "^4.15.0",
     "axios": "^1.6.4",
     "discord.js": "^14.8.0",
     "dotenv": "^16.0.2",
