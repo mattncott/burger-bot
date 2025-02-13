@@ -11,11 +11,11 @@
     "madge-circular": "madge src -c"
   },
   "dependencies": {
-    "@discordjs/rest": "^1.7.1",
+    "@discordjs/rest": "^2.4.3",
     "@tensorflow-models/mobilenet": "^2.1.0",
     "@tensorflow/tfjs-node": "^4.1.0",
     "axios": "^1.6.4",
-    "discord.js": "^14.8.0",
+    "discord.js": "^14.18.0",
     "dotenv": "^16.0.2",
     "jimp": "^0.17.0",
     "jpeg-js": "^0.4.4",
